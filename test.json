@@ -1,0 +1,79 @@
+[
+  {
+    "houseNumber": 1,
+    "sign": "Leo",
+    "planets": []
+  },
+  {
+    "houseNumber": 2,
+    "sign": "Virgo",
+    "planets": []
+  },
+  {
+    "houseNumber": 3,
+    "sign": "Libra",
+    "planets": []
+  },
+  {
+    "houseNumber": 4,
+    "sign": "Scorpio",
+    "planets": [
+      "Moon",
+      "Pluto"
+    ]
+  },
+  {
+    "houseNumber": 5,
+    "sign": "Sagittarius",
+    "planets": []
+  },
+  {
+    "houseNumber": 6,
+    "sign": "Capricorn",
+    "planets": [
+      "Uranus",
+      "Neptune",
+      "Ketu"
+    ]
+  },
+  {
+    "houseNumber": 7,
+    "sign": "Aquarius",
+    "planets": []
+  },
+  {
+    "houseNumber": 8,
+    "sign": "Pisces",
+    "planets": []
+  },
+  {
+    "houseNumber": 9,
+    "sign": "Aries",
+    "planets": []
+  },
+  {
+    "houseNumber": 10,
+    "sign": "Taurus",
+    "planets": [
+      "Jupiter",
+      "Saturn"
+    ]
+  },
+  {
+    "houseNumber": 11,
+    "sign": "Gemini",
+    "planets": [
+      "Sun",
+      "Mercury",
+      "Venus",
+      "Mars"
+    ]
+  },
+  {
+    "houseNumber": 12,
+    "sign": "Cancer",
+    "planets": [
+      "Rahu"
+    ]
+  }
+]

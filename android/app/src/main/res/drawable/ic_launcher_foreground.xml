@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Filled Gold Crescent Moon -->
+    <path
+        android:fillColor="#D4A843"
+        android:pathData="
+            M 60,30
+            C 44,30 32,42 32,54
+            C 32,70 44,82 60,82
+            C 50,78 44,68 44,56
+            C 44,42 52,33 60,30
+            Z"/>
+
+    <!-- Sparkle Star (4-pointed) -->
+    <path
+        android:fillColor="#D4A843"
+        android:pathData="
+            M 74,32
+            L 75.5,36.5
+            L 80,38
+            L 75.5,39.5
+            L 74,44
+            L 72.5,39.5
+            L 68,38
+            L 72.5,36.5
+            Z"/>
+
+    <!-- Small dot sparkle -->
+    <path
+        android:fillColor="#D4A843"
+        android:pathData="
+            M 80,30
+            A 1.5,1.5 0 1,1 80,33
+            A 1.5,1.5 0 1,1 80,30
+            Z"/>
+</vector>

@@ -1,0 +1,8 @@
+{
+  "name": "AstroVeda AI Zump",
+  "description": "A premium AI-powered Vedic astrology engine providing real-time birth chart analysis, horoscopes, and spiritual guidance.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}

@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* ===== Dark Mode CSS Variables ===== */
+:root {
+  --dm-bg: #faf9f6;
+  --dm-surface: #ffffff;
+  --dm-surface-raised: #f5f5f4;
+  --dm-border: #e7e5e4;
+  --dm-border-subtle: #f5f5f4;
+  --dm-text: #1c1917;
+  --dm-text-secondary: #44403c;
+  --dm-text-muted: #78716c;
+  --dm-text-faint: #a8a29e;
+  --dm-gold: #d4af37;
+  --dm-gold-soft: #fef9c3;
+  --dm-card: #ffffff;
+  --dm-nav-bg: rgba(255,255,255,0.95);
+  --dm-input-bg: #f5f5f4;
+  --dm-shadow: rgba(0,0,0,0.05);
+}
+
+:root.dark {
+  --dm-bg: #141413;
+  --dm-surface: #1c1b19;
+  --dm-surface-raised: #2a2826;
+  --dm-border: #33312e;
+  --dm-border-subtle: #2a2826;
+  --dm-text: #e6e4df;
+  --dm-text-secondary: #dcdad5;
+  --dm-text-muted: #a8a6a1;
+  --dm-text-faint: #666460;
+  --dm-gold: #c5a059;
+  --dm-gold-soft: #332b1e;
+  --dm-card: #1c1b19;
+  --dm-nav-bg: rgba(20,20,19,0.95);
+  --dm-input-bg: #2a2826;
+  --dm-shadow: rgba(0,0,0,0.3);
+}
+
+/* Auto-apply dark background & text on body */
+:root.dark body {
+  background-color: var(--dm-bg);
+  color: var(--dm-text);
+}
+
+/* Dark mode overrides for common elements */
+:root.dark .bg-ivory-50,
+:root.dark .bg-ivory-100 {
+  background-color: var(--dm-bg) !important;
+}
+
+:root.dark .bg-white {
+  background-color: var(--dm-surface) !important;
+}
+
+:root.dark .bg-stone-50,
+:root.dark .bg-stone-100 {
+  background-color: var(--dm-surface-raised) !important;
+}
+
+:root.dark .border-stone-100,
+:root.dark .border-stone-200 {
+  border-color: var(--dm-border) !important;
+}
+
+:root.dark .border-stone-50 {
+  border-color: var(--dm-border-subtle) !important;
+}
+
+:root.dark .text-charcoal-900 {
+  color: var(--dm-text) !important;
+}
+
+:root.dark .text-charcoal-800 {
+  color: var(--dm-text-secondary) !important;
+}
+
+:root.dark .text-charcoal-700,
+:root.dark .text-charcoal-600 {
+  color: var(--dm-text-muted) !important;
+}
+
+:root.dark .text-charcoal-500,
+:root.dark .text-charcoal-400 {
+  color: var(--dm-text-faint) !important;
+}
+
+:root.dark .text-stone-400,
+:root.dark .text-stone-500 {
+  color: var(--dm-text-faint) !important;
+}
+
+:root.dark .text-stone-300 {
+  color: #555250 !important;
+}
+
+:root.dark .text-gold-600,
+:root.dark .text-gold-500 {
+  color: var(--dm-gold) !important;
+}
+
+:root.dark .bg-gold-50 {
+  background-color: var(--dm-gold-soft) !important;
+}
+
+:root.dark .bg-auth-cream {
+  background-color: var(--dm-surface) !important;
+}
+
+/* Dark mode shadows */
+:root.dark .shadow-sm,
+:root.dark .shadow-md,
+:root.dark .shadow-lg,
+:root.dark .shadow-xl {
+  --tw-shadow-color: rgba(0,0,0,0.4) !important;
+}
+
+/* Dark mode scrollbar */
+:root.dark ::-webkit-scrollbar-thumb {
+  background-color: #33312e;
+}
+
+:root.dark ::-webkit-scrollbar-track {
+  background-color: #1c1b19;
+}
+
+/* Bottom nav dark mode */
+:root.dark .nav-bottom-bar {
+  background-color: var(--dm-nav-bg) !important;
+  border-color: var(--dm-border) !important;
+}
+
+/* Card dark mode */
+:root.dark .bg-white\/95,
+:root.dark .bg-white\/90 {
+  background-color: rgba(28, 27, 25, 0.95) !important;
+}
+
+/* Input fields in dark mode */
+:root.dark input,
+:root.dark select,
+:root.dark textarea {
+  background-color: var(--dm-input-bg) !important;
+  color: var(--dm-text) !important;
+  border-color: var(--dm-border) !important;
+}
+
+:root.dark input.bg-transparent,
+:root.dark select.bg-transparent,
+:root.dark textarea.bg-transparent {
+  background-color: transparent !important;
+}
+
+:root.dark input::placeholder {
+  color: var(--dm-text-faint) !important;
+}
+
+/* Dark mode for specific app elements */
+:root.dark .bg-charcoal-900 {
+  background-color: #0a0a09 !important;
+}
+
+:root.dark .bg-\[\#fdfcfb\] {
+  background-color: var(--dm-bg) !important;
+}
+
+:root.dark .border-stone-200\/60 {
+  border-color: var(--dm-border) !important;
+}
+
+:root.dark .bg-gold-50\/20 {
+  background-color: rgba(51, 43, 30, 0.4) !important;
+}
+
+:root.dark .border-gold-200\/50 {
+  border-color: rgba(197, 160, 89, 0.2) !important;
+}
+
+:root.dark .from-white {
+  --tw-gradient-from: var(--dm-surface) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root.dark .to-white\/0 {
+  --tw-gradient-to: rgba(28, 27, 25, 0) var(--tw-gradient-to-position) !important;
+}
+
+:root.dark .hover\:bg-stone-50:hover {
+  background-color: var(--dm-surface-raised) !important;
+}
+
+:root.dark .hover\:bg-gold-50:hover {
+  background-color: var(--dm-gold-soft) !important;
+}
+
+/* Backdrop blur containers */
+:root.dark .backdrop-blur-xl,
+:root.dark .backdrop-blur-md {
+  background-color: rgba(20, 20, 19, 0.85) !important;
+}
+
+/* Layout wrapper dark mode */
+:root.dark .bg-\[\#F2F0EB\] {
+  background-color: #0d0d0c !important;
+}
+
+:root.dark .border-white\/60 {
+  border-color: #33312e !important;
+}
+
+/* Navigation active state */
+:root.dark .bg-charcoal-900.text-gold-400 {
+  background-color: #0a0a09 !important;
+}
+
+/* User dashboard drawer dark mode */
+:root.dark .bg-ivory-50\/95,
+:root.dark .bg-ivory-100\/95 {
+  background-color: rgba(20, 20, 19, 0.95) !important;
+}
+
+/* Selected nav / active pills in dark mode */
+:root.dark .text-gold-400 {
+  color: #c5a059 !important;
+}
+
+/* Green success states */
+:root.dark .bg-green-50 {
+  background-color: #1a2e1a !important;
+}
+
+/* Ambient glow effects toned down in dark */
+:root.dark .bg-gold-400\/5 {
+  background-color: rgba(197, 160, 89, 0.03) !important;
+}
+
+:root.dark .bg-cosmic-500\/5 {
+  background-color: rgba(100, 80, 140, 0.03) !important;
+}
+
+/* Noise texture reduced in dark */
+:root.dark .bg-noise {
+  opacity: 0.15 !important;
+}
