@@ -25,23 +25,12 @@ export default defineConfig(({ mode }) => {
         minify: 'terser' as const,
         terserOptions: {
           compress: {
-            // Remove all console.* statements in production
-            drop_console: isProd,
             drop_debugger: isProd,
-            // Dead code elimination
             dead_code: true,
-            passes: 3,
+            passes: 2,
           },
-          mangle: {
-            // Aggressively rename all variables/functions
-            toplevel: true,
-            properties: {
-              // Mangle private properties (starting with _)
-              regex: /^_/,
-            },
-          },
+          mangle: true,
           format: {
-            // Remove all comments
             comments: false,
           },
         },
