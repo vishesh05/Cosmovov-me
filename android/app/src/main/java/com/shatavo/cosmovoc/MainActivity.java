@@ -1,4 +1,4 @@
-package com.astroveda.cosmovoc;
+package com.shatavo.cosmovoc;
 
 import com.getcapacitor.BridgeActivity;
 

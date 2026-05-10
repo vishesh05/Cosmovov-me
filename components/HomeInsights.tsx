@@ -17,7 +17,6 @@ const getEventIcon = (type: PathEvent['type']) => {
     case 'marriage': return <Icons.Heart className="w-5 h-5 text-pink-500 fill-current" />;
     case 'child': return <Icons.Sun className="w-5 h-5 text-amber-500" />;
     case 'challenge': return <Icons.Activity className="w-5 h-5 text-charcoal-400" />;
-    case 'career': return <Icons.Briefcase className="w-5 h-5 text-indigo-500 fill-current" />;
     default: return <Icons.ChevronRight className="w-5 h-5 text-stone-400" />;
   }
 };
@@ -28,7 +27,6 @@ const getEventColor = (type: PathEvent['type']) => {
     case 'marriage': return 'bg-pink-50 border-pink-200 text-pink-700 shadow-pink-900/10';
     case 'child': return 'bg-amber-50 border-amber-200 text-amber-700 shadow-amber-900/10';
     case 'challenge': return 'bg-stone-100 border-stone-300 text-stone-700 shadow-stone-900/10';
-    case 'career': return 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-indigo-900/10';
     default: return 'bg-white border-stone-200 text-stone-700 shadow-stone-900/10';
   }
 };
@@ -109,17 +107,8 @@ const HomeInsights: React.FC<HomeInsightsProps> = ({ analysis, profile }) => {
               {getEventIcon(event.type)}
               {/* Optional little age badge below the node */}
               <div className="absolute -bottom-6 bg-white/90 backdrop-blur-sm border border-stone-100 rounded-full px-2 py-0.5 text-[10px] font-bold text-stone-600 shadow-sm whitespace-nowrap">
-                {event.isPast ? (
-                  <span className="flex items-center gap-1 text-emerald-600">
-                    <Icons.Check className="w-2.5 h-2.5" /> Age {event.age}
-                  </span>
-                ) : `Ages ${event.age}-${event.endAge}`}
+                Ages {event.age}-{event.endAge}
               </div>
-              {event.isPast && (
-                <div className="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full p-1 shadow-md border border-white">
-                  <Icons.Check className="w-2.5 h-2.5" />
-                </div>
-              )}
             </button>
           );
         })}
@@ -168,11 +157,9 @@ const HomeInsights: React.FC<HomeInsightsProps> = ({ analysis, profile }) => {
                 {selectedEvent.title}
               </h4>
               <div className="inline-flex items-center gap-3 px-4 py-2 bg-stone-50 rounded-xl border border-stone-100 text-sm font-medium whitespace-nowrap overflow-hidden shadow-sm">
-                <span className="text-stone-500">{selectedEvent.year}</span>
+                <span className="text-stone-500">{selectedEvent.year} - {selectedEvent.endYear}</span>
                 <div className="w-1 h-1 flex-shrink-0 rounded-full bg-gold-400 opacity-50"></div>
-                <span className={selectedEvent.isPast ? 'text-emerald-600' : 'text-gold-600'}>
-                  {selectedEvent.isPast ? 'Verified Milestone' : `Ages ${selectedEvent.age}-${selectedEvent.endAge}`}
-                </span>
+                <span className="text-gold-600">Ages {selectedEvent.age}-{selectedEvent.endAge}</span>
               </div>
             </div>
 

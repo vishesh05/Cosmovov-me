@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Icons } from '../components/Icons';
-import { chatWithAstrologer, getAdviceChannel, generateDynamicSuggestions } from '../services/geminiService';
+import { chatWithAstrologer, getTimingInsight, getDeepInsight, getAdviceChannel, generateDynamicSuggestions } from '../services/geminiService';
 import { ChatSession, ChatMessage, BirthChartAnalysis, UserProfile } from '../types';
 import { getSessions, saveSession, createNewSession, getLastActiveSessionId, deleteSession, updateSessionTitle } from '../services/chatStorage';
 import { ChatSidebar } from '../components/chat/ChatSidebar';
 import { TypewriterText } from '../components/chat/TypewriterText';
 import { CosmoVocAvatar } from '../components/chat/CosmoVocAvatar';
 import { useTheme } from '../contexts/ThemeContext';
-import { Capacitor } from '@capacitor/core';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { trackChatMessage } from '../services/analyticsTracker';
 
 interface ChatViewProps {
     analysis: BirthChartAnalysis;
@@ -53,27 +52,11 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
         };
     }, []);
 
-    const toggleListening = async () => {
+    const toggleListening = () => {
         if (isListening) {
             recognitionRef.current?.stop();
             setIsListening(false);
             return;
-        }
-
-        if (Capacitor.isNativePlatform()) {
-            try {
-                const { VoiceRecorder } = await import('capacitor-voice-recorder');
-                const permission = await VoiceRecorder.hasAudioRecordingPermission();
-                if (!permission.value) {
-                    const request = await VoiceRecorder.requestAudioRecordingPermission();
-                    if (!request.value) {
-                        alert("Microphone permission is required for voice input.");
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.error("VoiceRecorder permission error:", e);
-            }
         }
 
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -151,10 +134,6 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
         const textToSend = textOverride || input;
         if (!textToSend.trim() || !currentSessionId || !currentSession) return;
 
-        if (Capacitor.isNativePlatform()) {
-            Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
-        }
-
         // Stop listening if sending
         if (isListening) {
             recognitionRef.current?.stop();
@@ -204,8 +183,14 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
             saveSession(finalSession, profile);
             setAnimatingMessageId(aiMsg.id);
 
+            // Track Analytics
+            const inputTokens = Math.ceil(userMsg.text.length / 4);
+            const outputTokens = Math.ceil(response.length / 4);
+            trackChatMessage(inputTokens, outputTokens, topic);
+
             // Silent secondary call for dynamic suggestions
-            generateDynamicSuggestions(userMsg.text, response).then(dynamicSuggestions => {
+            const conversationText = finalSession.messages.map(m => `${m.sender === 'ai' ? 'Astrologer' : 'User'}: ${m.text}`).join('\n\n');
+            generateDynamicSuggestions(conversationText).then(dynamicSuggestions => {
                 setSessions(prevSessions => {
                     return prevSessions.map(s => {
                         if (s.id !== currentSessionId) return s;
@@ -233,16 +218,106 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
 
     // --- Separated Channel Handlers (On-Demand, No Full Chat) ---
 
-    const handleAdviceRemedies = async (parentMsg: ChatMessage) => {
+    const handleTimingChannel = async (parentMsg: ChatMessage) => {
         if (!currentSessionId || !currentSession) return;
         setIsTyping(true);
         try {
             const topic = parentMsg.topicDetected || 'general';
-            const adviceText = await getAdviceChannel(topic, analysis, profile, parentMsg.text);
+            const timingText = await getTimingInsight(topic, analysis, profile);
+            const aiMsg: ChatMessage = {
+                id: (Date.now() + 2).toString(),
+                sender: 'ai',
+                text: `Current Timing:\n\n${timingText}`,
+                timestamp: new Date(),
+                suggestions: [],
+                adviceCards: [],
+                topicDetected: topic
+            };
+            const updatedSession = {
+                ...currentSession,
+                messages: [...currentSession.messages, aiMsg],
+                lastModified: Date.now()
+            };
+            setSessions(prev => prev.map(s => s.id === currentSessionId ? updatedSession : s));
+            saveSession(updatedSession, profile);
+            setAnimatingMessageId(aiMsg.id);
+
+            // Silent suggestion generation for Timing channel too
+            const conversationText = updatedSession.messages.map(m => `${m.sender === 'ai' ? 'Astrologer' : 'User'}: ${m.text}`).join('\n\n');
+            generateDynamicSuggestions(conversationText).then(dynamicSuggestions => {
+                setSessions(prevSessions => {
+                    return prevSessions.map(s => {
+                        if (s.id !== currentSessionId) return s;
+                        const msgArr = s.messages.map(m => m.id === aiMsg.id ? { ...m, suggestions: dynamicSuggestions } : m);
+                        const newS = { ...s, messages: msgArr };
+                        saveSession(newS, profile);
+                        return newS;
+                    });
+                });
+            });
+
+        } catch (e) {
+            console.error('Timing channel error:', e);
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
+    const handleDeepInsightChannel = async (parentMsg: ChatMessage) => {
+        if (!currentSessionId || !currentSession) return;
+        setIsTyping(true);
+        try {
+            const topic = parentMsg.topicDetected || 'general';
+            const insightText = await getDeepInsight(topic, analysis, profile);
+            const aiMsg: ChatMessage = {
+                id: (Date.now() + 3).toString(),
+                sender: 'ai',
+                text: `Deep Insight:\n\n${insightText}`,
+                timestamp: new Date(),
+                suggestions: [],
+                adviceCards: [],
+                topicDetected: topic
+            };
+            const updatedSession = {
+                ...currentSession,
+                messages: [...currentSession.messages, aiMsg],
+                lastModified: Date.now()
+            };
+            setSessions(prev => prev.map(s => s.id === currentSessionId ? updatedSession : s));
+            saveSession(updatedSession, profile);
+            setAnimatingMessageId(aiMsg.id);
+
+            // Silent suggestion generation for Deep Insight channel too
+            const conversationText = updatedSession.messages.map(m => `${m.sender === 'ai' ? 'Astrologer' : 'User'}: ${m.text}`).join('\n\n');
+            generateDynamicSuggestions(conversationText).then(dynamicSuggestions => {
+                setSessions(prevSessions => {
+                    return prevSessions.map(s => {
+                        if (s.id !== currentSessionId) return s;
+                        const msgArr = s.messages.map(m => m.id === aiMsg.id ? { ...m, suggestions: dynamicSuggestions } : m);
+                        const newS = { ...s, messages: msgArr };
+                        saveSession(newS, profile);
+                        return newS;
+                    });
+                });
+            });
+
+        } catch (e) {
+            console.error('Deep insight channel error:', e);
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
+    const handleAdviceChannel = async (parentMsg: ChatMessage) => {
+        if (!currentSessionId || !currentSession) return;
+        setIsTyping(true);
+        try {
+            const topic = parentMsg.topicDetected || 'general';
+            const adviceText = await getAdviceChannel(topic, analysis, profile);
             const aiMsg: ChatMessage = {
                 id: (Date.now() + 4).toString(),
                 sender: 'ai',
-                text: adviceText,
+                text: `Actionable Advice:\n\n${adviceText}`,
                 timestamp: new Date(),
                 suggestions: [],
                 topicDetected: topic
@@ -256,8 +331,9 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
             saveSession(updatedSession, profile);
             setAnimatingMessageId(aiMsg.id);
 
-            // Generate follow-ups for the advice too
-            generateDynamicSuggestions(parentMsg.text || "advice and remedies", adviceText).then(dynamicSuggestions => {
+            // Silent suggestion generation for Advice channel too
+            const conversationText = updatedSession.messages.map(m => `${m.sender === 'ai' ? 'Astrologer' : 'User'}: ${m.text}`).join('\n\n');
+            generateDynamicSuggestions(conversationText).then(dynamicSuggestions => {
                 setSessions(prevSessions => {
                     return prevSessions.map(s => {
                         if (s.id !== currentSessionId) return s;
@@ -270,10 +346,40 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
             });
 
         } catch (e) {
-            console.error('Advice & Remedies error:', e);
+            console.error('Advice channel error:', e);
         } finally {
             setIsTyping(false);
         }
+    };
+
+    const getActionChips = (topic?: string, msg?: ChatMessage) => {
+        const t = (topic || 'general').toLowerCase();
+        if (t === 'career') return [
+            { label: 'Business Potential', icon: <Icons.Wand className="w-4 h-4" />, action: () => msg && handleAdviceChannel(msg) },
+            { label: 'Promotion Prospects', icon: <Icons.Eye className="w-4 h-4" />, action: () => msg && handleDeepInsightChannel(msg) },
+            { label: 'Career Timing', icon: <Icons.MoonStar className="w-4 h-4" />, action: () => msg && handleTimingChannel(msg) }
+        ];
+        if (t === 'marriage' || t === 'love') return [
+            { label: 'Partner Traits', icon: <Icons.Wand className="w-4 h-4" />, action: () => msg && handleAdviceChannel(msg) },
+            { label: 'Compatibility', icon: <Icons.Eye className="w-4 h-4" />, action: () => msg && handleDeepInsightChannel(msg) },
+            { label: 'Marriage Timing', icon: <Icons.MoonStar className="w-4 h-4" />, action: () => msg && handleTimingChannel(msg) }
+        ];
+        if (t === 'finance') return [
+            { label: 'Wealth Yoga', icon: <Icons.Wand className="w-4 h-4" />, action: () => msg && handleAdviceChannel(msg) },
+            { label: 'Income Period', icon: <Icons.Eye className="w-4 h-4" />, action: () => msg && handleDeepInsightChannel(msg) },
+            { label: 'Investment Timing', icon: <Icons.MoonStar className="w-4 h-4" />, action: () => msg && handleTimingChannel(msg) }
+        ];
+        if (t === 'health') return [
+            { label: 'Remedy', icon: <Icons.Wand className="w-4 h-4" />, action: () => msg && handleAdviceChannel(msg) },
+            { label: 'Weak Planets', icon: <Icons.Eye className="w-4 h-4" />, action: () => msg && handleDeepInsightChannel(msg) },
+            { label: 'Health Period', icon: <Icons.MoonStar className="w-4 h-4" />, action: () => msg && handleTimingChannel(msg) }
+        ];
+        
+        return [
+            { label: 'Advice', icon: <Icons.Wand className="w-4 h-4" />, action: () => msg && handleAdviceChannel(msg) },
+            { label: 'Deep Insight', icon: <Icons.Eye className="w-4 h-4" />, action: () => msg && handleDeepInsightChannel(msg) },
+            { label: 'Timing', icon: <Icons.MoonStar className="w-4 h-4" />, action: () => msg && handleTimingChannel(msg) }
+        ];
     };
 
     const quickCategories = [
@@ -293,21 +399,21 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
         }
     };
 
-    // High Contrast Dark Mode Colors
+    // Subtle Dark Mode Colors
     const colors = {
-        bg: isDarkMode ? 'bg-stone-950' : 'bg-ivory-100',
-        header: isDarkMode ? 'bg-stone-900 border-stone-800' : 'bg-white/95 border-stone-200',
-        headerText: isDarkMode ? 'text-white' : 'text-charcoal-900',
-        subText: isDarkMode ? 'text-stone-400' : 'text-stone-500',
+        bg: isDarkMode ? 'bg-[#141413]' : 'bg-ivory-100',
+        header: isDarkMode ? 'bg-[#1c1b19]/95 border-[#33312e]' : 'bg-white/95 border-stone-200',
+        headerText: isDarkMode ? 'text-[#f5f3ef]' : 'text-charcoal-900',
+        subText: isDarkMode ? 'text-[#b5b3ae]' : 'text-stone-500',
 
-        bubbleAi: isDarkMode ? 'bg-stone-800 border border-stone-700 text-stone-100' : 'bg-white border border-stone-200 text-charcoal-800',
-        bubbleUser: isDarkMode ? 'bg-stone-700 border border-stone-600 text-white' : 'bg-charcoal-900 text-ivory-50 shadow-xl shadow-charcoal-900/10',
+        bubbleAi: isDarkMode ? 'bg-[#1c1b19] border border-[#33312e] text-[#f0eee9]' : 'bg-white border border-stone-200 text-charcoal-800',
+        bubbleUser: isDarkMode ? 'bg-[#332b1e] border border-[#4d402b] text-[#f5f0e6]' : 'bg-charcoal-900 text-ivory-50 shadow-xl shadow-charcoal-900/10',
 
-        inputBar: isDarkMode ? 'bg-stone-900 border-stone-800' : 'bg-white/90 border-stone-200',
-        inputField: isDarkMode ? 'bg-stone-800 border-stone-700 text-stone-100' : 'bg-stone-50 border-stone-200 text-charcoal-900',
+        inputBar: isDarkMode ? 'bg-[#1c1b19] border-[#33312e]' : 'bg-white/90 border-stone-200',
+        inputField: isDarkMode ? 'bg-[#2a2826] border-[#33312e] text-[#f0eee9]' : 'bg-stone-50 border-stone-200 text-charcoal-900',
 
-        iconButton: isDarkMode ? 'text-stone-400 hover:text-white' : 'text-stone-400 hover:text-charcoal-800',
-        chip: isDarkMode ? 'bg-stone-800 border-stone-700 text-stone-300 hover:text-white hover:border-stone-500' : 'bg-white border-stone-200 text-charcoal-600 hover:bg-gold-50 hover:border-gold-300'
+        iconButton: isDarkMode ? 'text-[#b5b3ae] hover:text-[#f0eee9]' : 'text-stone-400 hover:text-charcoal-800',
+        chip: isDarkMode ? 'bg-[#2a2826] border-[#33312e] text-[#b5b3ae] hover:text-[#f0eee9] hover:border-[#4d402b]' : 'bg-white border-stone-200 text-charcoal-600 hover:bg-gold-50 hover:border-gold-300'
     };
 
     return (
@@ -397,7 +503,7 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
                                                 onClick={() => handleSend(q)}
                                                 className={`px-4 py-2 rounded-full text-[11px] font-medium transition-all active:scale-95 whitespace-nowrap border ${
                                                     isDarkMode
-                                                        ? 'bg-stone-900 border-stone-800 text-stone-400 hover:border-gold-500/40 hover:text-gold-500'
+                                                        ? 'bg-[#1c1b19] border-[#33312e] text-[#a8a6a1] hover:border-[#c5a059]/40 hover:text-[#c5a059]'
                                                         : 'bg-white/80 border-stone-200 text-charcoal-600 hover:border-gold-400 hover:text-gold-600 shadow-sm'
                                                 }`}
                                             >
@@ -417,7 +523,7 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
                                     onClick={() => handleSend(cat.questions[0])}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all active:scale-95 border ${
                                         isDarkMode
-                                            ? 'bg-stone-900 border-stone-800 text-stone-400 hover:text-gold-500 hover:border-gold-900'
+                                            ? 'bg-[#1c1b19] border-[#33312e] text-[#888682] hover:text-[#c5a059] hover:border-[#4d402b]'
                                             : 'bg-white border-stone-200 text-stone-400 hover:text-gold-600 hover:border-gold-300 shadow-sm'
                                     }`}
                                 >
@@ -517,19 +623,21 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
                                 </div>
 
                                 {msg.sender === 'ai' && (
-                                    <div className="mt-2.5">
-                                        <div className={`rounded-full p-[1px] inline-block transition-colors group ${isDarkMode ? 'bg-gradient-to-br from-[#c5a059]/30 via-[#c5a059]/10 to-[#c5a059]/30 hover:from-[#c5a059]/60 hover:to-[#c5a059]/80' : 'bg-gradient-to-br from-gold-400/30 via-gold-200/10 to-gold-400/30 hover:from-gold-300 hover:to-gold-500'}`}>
-                                            <button
-                                                onClick={() => handleAdviceRemedies(msg)}
-                                                className={`px-3 py-[5px] rounded-full text-[10px] font-bold flex items-center gap-2 transition-colors ${
-                                                    isDarkMode 
-                                                        ? 'bg-stone-900 text-stone-400 group-hover:text-gold-400' 
-                                                        : 'bg-stone-50 text-stone-500 group-hover:text-gold-700'
-                                                }`}
-                                            >
-                                                <span>💊</span> <span className="pt-[1px]">Advice & Remedies</span>
-                                            </button>
-                                        </div>
+                                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                        {getActionChips(msg.topicDetected, msg).map((chip, cIdx) => (
+                                            <div key={cIdx} className={`rounded-full p-[1px] transition-colors group ${isDarkMode ? 'bg-gradient-to-br from-[#c5a059]/30 via-[#c5a059]/10 to-[#c5a059]/30 hover:from-[#c5a059]/60 hover:to-[#c5a059]/80' : 'bg-gradient-to-br from-gold-400/30 via-gold-200/10 to-gold-400/30 hover:from-gold-300 hover:to-gold-500'}`}>
+                                                <button
+                                                    onClick={chip.action}
+                                                    className={`px-[11px] py-[5px] rounded-full text-[10px] font-bold flex items-center gap-2 transition-colors ${
+                                                        isDarkMode 
+                                                            ? 'bg-[#2a2826] text-[#a8a6a1] group-hover:text-[#c5a059]' 
+                                                            : 'bg-stone-50 text-stone-500 group-hover:text-gold-700'
+                                                    }`}
+                                                >
+                                                    {chip.icon} <span className="pt-[1px]">{chip.label}</span>
+                                                </button>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -549,7 +657,7 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
                                             onClick={() => handleSend(s)} 
                                             className={`px-4 py-2.5 text-[11px] leading-tight text-left rounded-2xl border transition-colors active:scale-[0.99] max-w-[90%]
                                             ${isDarkMode 
-                                                ? 'bg-stone-900 border-stone-800 text-stone-300 hover:border-stone-700 hover:text-gold-400' 
+                                                ? 'bg-[#1c1b19] border-[#33312e] text-[#dcdad5] hover:border-[#4d402b] hover:text-[#c5a059]' 
                                                 : 'bg-white border-stone-200 text-charcoal-700 hover:border-gold-300 hover:text-gold-700 shadow-sm'
                                             }`}
                                         >

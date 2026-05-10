@@ -263,20 +263,16 @@ function calculateTodaysFlow(analysis: BirthChartAnalysis, todayMoonNakshatra: s
     if (taraNum === 0) taraNum = 9;
 
     const quality = TARA_QUALITY[taraNum] || 'neutral';
+    const moonSign = ZODIAC_SIGNS[Math.floor(todayIdx / (27 / 12))] || '';
     const ascendant = analysis.ascendant;
-    const nakLord = NAKSHATRA_LORDS_MAP[todayMoonNakshatra] || 'the stars';
 
-    const baseText = quality === 'friend' 
-        ? `Today's celestial rhythm, governed by ${todayMoonNakshatra} (${nakLord}), harmonizes beautifully with your ${ascendant} spirit. `
-        : quality === 'enemy'
-        ? `The transit of the Moon through ${todayMoonNakshatra} invites a period of introspection and careful action. `
-        : `A balanced cosmic rhythm unfolds today as the Moon moves through ${todayMoonNakshatra}. `;
-
-    const dashaContext = analysis.dashas?.[0]?.planet 
-        ? `Under your current ${analysis.dashas[0].planet} Mahadasha, this lunar transit amplifies your capacity for ${analysis.dashas[0].planet === 'Jupiter' ? 'wisdom' : 'growth'}. `
-        : '';
-
-    return `${baseText}${dashaContext}Focus on steady progress and trust your intuition.`.trim();
+    if (quality === 'friend') {
+        return `Today's celestial rhythm harmonizes beautifully with your inner nature. The moon's gentle energy supports your ${ascendant} spirit, creating a smooth and flowing day ahead. Trust your instincts — the universe is on your side.`;
+    } else if (quality === 'enemy') {
+        return `Today's cosmic energy invites mindful awareness from you. The moon's current position creates a subtle tension with your natural rhythm, so take a patient and centered approach. Move carefully and trust that challenges today are building inner resilience.`;
+    } else {
+        return `Today brings a balanced cosmic rhythm — neither rushing nor holding you back. The moon's energy gently supports steady progress, making this a good day for measured decisions. Stay grounded and let things unfold at their own pace.`;
+    }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -511,52 +507,7 @@ function formatHour(h: number): string {
     return `${displayH}:00 ${ampm}`;
 }
 
-// ═══════════════════════════════════════════════════════
-// ─── SECTION 4: CORE & GROWTH POWER ───
-// ═══════════════════════════════════════════════════════
 
-function calculateCoreAndGrowth(
-    analysis: BirthChartAnalysis,
-    transits: TransitPlanet[]
-): { coreFocus: { title: string; description: string }; growthArea: { title: string; description: string } } {
-    const classicalPlanets = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
-    const scores: { planet: string; score: number }[] = [];
-
-    classicalPlanets.forEach(pName => {
-        const natal = analysis.planetaryDetails.find(p => p.name === pName);
-        if (!natal) return;
-
-        let score = getNatalPlanetStrength(natal, analysis.houses);
-
-        // Boost if transit is strong today
-        const transit = transits.find(t => t.name === pName);
-        if (transit) {
-            score += getTransitSignFriendliness(transit);
-            if (transit.isRetro) score += 5;
-        }
-
-        scores.push({ planet: pName, score });
-    });
-
-    scores.sort((a, b) => b.score - a.score);
-
-    const strongest = scores[0];
-    const weakest = scores[scores.length - 1];
-
-    const coreTheme = PLANET_THEMES[strongest?.planet] || PLANET_THEMES['Sun'];
-    const growthTheme = PLANET_THEMES[weakest?.planet] || PLANET_THEMES['Saturn'];
-
-    return {
-        coreFocus: {
-            title: coreTheme.title,
-            description: coreTheme.coreDesc
-        },
-        growthArea: {
-            title: growthTheme.title,
-            description: growthTheme.growthDesc
-        }
-    };
-}
 
 // ═══════════════════════════════════════════════════════
 // ─── SECTION 5: DAILY RITUAL ───
@@ -617,19 +568,9 @@ export function calculateTodayData(analysis: BirthChartAnalysis, profile: UserPr
     const todayMoonNakshatra = moonPlanet?.nakshatra || moonTransit?.nakshatra || 'Ashwini';
 
     // 3. Get panchang data for tithi
-    // Use user's profile location if possible to adjust panchang accuracy
-    let lat = 28.6139; // Delhi default
-    let lon = 77.2090;
-
-    const loc = (profile.location || '').toLowerCase();
-    if (loc.includes('london')) { lat = 51.5074; lon = -0.1278; }
-    else if (loc.includes('new york')) { lat = 40.7128; lon = -74.0060; }
-    else if (loc.includes('mumbai')) { lat = 19.0760; lon = 72.8777; }
-    else if (loc.includes('bangalore') || loc.includes('bengaluru')) { lat = 12.9716; lon = 77.5946; }
-    else if (loc.includes('dubai')) { lat = 25.2048; lon = 55.2708; }
-    else if (loc.includes('san francisco')) { lat = 37.7749; lon = -122.4194; }
-    else if (loc.includes('singapore')) { lat = 1.3521; lon = 103.8198; }
-
+    // Use approximate coords for India (default)
+    const lat = 28.6139; // Delhi default
+    const lon = 77.2090;
     const panchang = getPanchangInfo(now, lat, lon);
     const tithiIndex = panchang.tithiIndex;
     const paksha = panchang.paksha;
@@ -689,7 +630,6 @@ export function calculateTodayData(analysis: BirthChartAnalysis, profile: UserPr
         sunriseHour
     );
 
-    const coreAndGrowth = calculateCoreAndGrowth(analysis, transits);
     const dailyRitual = calculateDailyRitual(analysis.ascendant, todayMoonNakshatra);
 
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -709,7 +649,7 @@ export function calculateTodayData(analysis: BirthChartAnalysis, profile: UserPr
                 number: advancedLucky.luckyNumber
             }
         },
-        coreAndGrowthPower: coreAndGrowth,
+
         dailyRitual,
         computedDate: dateStr,
         fullLuckyData: advancedLucky,

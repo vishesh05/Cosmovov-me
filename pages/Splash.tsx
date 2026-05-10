@@ -102,10 +102,11 @@ const Splash: React.FC<SplashProps> = ({ onFinish }) => {
             </svg>
 
             {/* Main Logo & Text Content */}
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="animate-logo-in mb-8 shadow-2xl shadow-charcoal-900/20 rounded-full">
-                        <CosmoVocAvatar isTyping={false} className="w-20 h-20" />
-                    </div>
+            <div className="relative z-10 flex flex-col items-center">
+                <div className="animate-logo-in mb-8 shadow-2xl shadow-charcoal-900/20 rounded-full bg-charcoal-900 flex items-center justify-center p-3 border border-white/10">
+                    {/* Inline Logo icon instead of Avatar to avoid circular dependency styling issues if they exist, or just use Avatar */}
+                    <CosmoVocAvatar isTyping={false} className="w-16 h-16" />
+                </div>
 
                 <h1 className="text-4xl font-serif text-charcoal-900 tracking-tight animate-text-reveal opacity-0" style={{ animationDelay: '0.4s' }}>
                     CosmoVoc

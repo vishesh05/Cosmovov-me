@@ -23,11 +23,13 @@ import AstrologerProfilePage from './pages/AstrologerProfilePage';
 import LiveChatRoom from './pages/LiveChatRoom';
 import LiveCallScreen from './pages/LiveCallScreen';
 
-// Admin Module Imports
 import AdminDashboardLayout from './admin_app/pages/AdminDashboardLayout';
 import AdminOverviewPage from './admin_app/pages/AdminOverviewPage';
+import AdminRetentionPage from './admin_app/pages/AdminRetentionPage';
+import AdminAIChatPage from './admin_app/pages/AdminAIChatPage';
+import AdminFeatureAnalyticsPage from './admin_app/pages/AdminFeatureAnalyticsPage';
+import AdminContentAnalyticsPage from './admin_app/pages/AdminContentAnalyticsPage';
 import AdminUsersPage from './admin_app/pages/AdminUsersPage';
-import AdminAstrologersPage from './admin_app/pages/AdminAstrologersPage';
 import AdminFinancePage from './admin_app/pages/AdminFinancePage';
 import AdminSupportPage from './admin_app/pages/AdminSupportPage';
 
@@ -45,14 +47,13 @@ import {
   normalizeDOB
 } from './services/auth';
 import { supabase } from './services/supabase';
+import { startPresenceHeartbeat, stopPresenceHeartbeat, trackPageView } from './services/analyticsTracker';
 import { CallConfirmationModal } from './components/AstrologerComponents';
 
 import WelcomeScreens from './pages/WelcomeScreens';
 import { AuthGate } from './components/AuthGate';
 import { ThemeProvider } from './contexts/ThemeContext';
 
-
-import { useNativeFeatures } from './hooks/useNativeFeatures';
 
 // Check if the cache is valid and contains outer planets
 const isCacheValid = (cachedJSON: string) => {
@@ -115,11 +116,6 @@ const App: React.FC = () => {
   const [analysis, setAnalysis] = useState<BirthChartAnalysis | null>(initialData.analysis);
   const [loading, setLoading] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Initialize native features (Capacitor)
-  useNativeFeatures(view, setView, drawerOpen, setDrawerOpen);
 
   // User's OWN personal chart — never changes when switching saved charts
   // The Today page always uses these to avoid recalculation costs
@@ -127,6 +123,7 @@ const App: React.FC = () => {
   const [userOwnProfile, setUserOwnProfile] = useState<UserProfile | null>(initialData.profile);
   const [userOwnAnalysis, setUserOwnAnalysis] = useState<BirthChartAnalysis | null>(initialData.analysis);
 
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>(getAuthState());
   const [showAuthGate, setShowAuthGate] = useState(false);
   const [showGuestToast, setShowGuestToast] = useState(false);
@@ -143,6 +140,20 @@ const App: React.FC = () => {
 
   // Navigation State for Profile
   const [activeProfileSection, setActiveProfileSection] = useState<'MENU' | 'BANKING' | 'PERSONAL'>('MENU');
+
+  // Analytics Tracking
+  useEffect(() => {
+    if (view && view !== AppView.Splash && !view.startsWith('ADMIN_')) {
+      trackPageView(view);
+      startPresenceHeartbeat(view);
+    } else if (view && view.startsWith('ADMIN_')) {
+      stopPresenceHeartbeat(); // Admins don't count as DAU
+    }
+    
+    return () => {
+      // Don't stop on unmount, as React StrictMode double-invokes. Just rely on view changes.
+    };
+  }, [view]);
 
   useEffect(() => {
     if (authState.isLoggedIn && authState.user && !profile) {
@@ -444,7 +455,8 @@ const App: React.FC = () => {
       // For returning users with cached data, skip animation delay
       const hasPreloadedData = analysis !== null;
       if (!hasPreloadedData) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Reduced to 250ms to prevent the long white blank gap when fading out
+        await new Promise(resolve => setTimeout(resolve, 250));
       } else {
         // Minimal delay for smooth transition
         await new Promise(resolve => setTimeout(resolve, 150));
@@ -467,7 +479,8 @@ const App: React.FC = () => {
       console.error("Failed getting auth session on splash finish", err);
       setView(AppView.Login);
     } finally {
-      setTransitioning(false);
+      // Small 50ms buffer to ensure View has swapped before resetting transition CSS
+      setTimeout(() => setTransitioning(false), 50);
     }
   }, [authState.isLoggedIn, authState.role, analysis]);
 
@@ -583,8 +596,11 @@ const App: React.FC = () => {
         onLogout={handleLogout}
       >
         {view === AppView.AdminDashboard && <AdminOverviewPage />}
+        {view === AppView.AdminRetention && <AdminRetentionPage />}
+        {view === AppView.AdminAIChat && <AdminAIChatPage />}
+        {view === AppView.AdminFeatures && <AdminFeatureAnalyticsPage />}
+        {view === AppView.AdminContent && <AdminContentAnalyticsPage />}
         {view === AppView.AdminUsers && <AdminUsersPage />}
-        {view === AppView.AdminAstrologers && <AdminAstrologersPage />}
         {view === AppView.AdminFinance && <AdminFinancePage />}
         {view === AppView.AdminSupport && <AdminSupportPage />}
       </AdminDashboardLayout>

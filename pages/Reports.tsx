@@ -52,7 +52,7 @@ interface ReportsProps {
 
 const Reports: React.FC<ReportsProps> = ({ onGetReport }) => {
     return (
-        <div className="flex-1 overflow-y-auto no-scrollbar pb-24 px-6 pt-8 bg-[#FDFCFB] animate-[fadeInScale_0.6s_ease-out]">
+        <div className="flex-1 overflow-y-auto no-scrollbar pb-24 px-6 pt-8 bg-[#FDFCFB] dark:bg-[#141413] animate-[fadeInScale_0.6s_ease-out]">
 
             {/* Header Section */}
             <div className="mb-8">

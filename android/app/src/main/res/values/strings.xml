@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">CosmoVoc</string>
     <string name="title_activity_main">CosmoVoc</string>
-    <string name="package_name">com.astroveda.cosmovoc</string>
-    <string name="custom_url_scheme">com.astroveda.cosmovoc</string>
+    <string name="package_name">com.shatavo.cosmovoc</string>
+    <string name="custom_url_scheme">com.shatavo.cosmovoc</string>
 </resources>

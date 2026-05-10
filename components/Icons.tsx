@@ -64,13 +64,6 @@ export const Icons = {
       <path d="M18 18L19 21L22 22L19 23L18 26L17 23L14 22L17 21L18 18Z" transform="scale(0.5) translate(24,24)" />
     </svg>
   ),
-  Orbit: ({ className, strokeWidth = 1.5 }: IconProps) => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(45 12 12)" />
-      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-45 12 12)" />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
-    </svg>
-  ),
   Home: ({ className, strokeWidth = 1.2 }: IconProps) => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} className={className}>
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>

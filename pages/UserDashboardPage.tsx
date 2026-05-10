@@ -31,7 +31,7 @@ type DashboardView = 'MAIN' | 'PROFILE' | 'AUTH' | 'WALLET' | 'TRANSACTIONS' | '
 
 const FullScreenPage: React.FC<{ children: React.ReactNode; isOpen: boolean }> = ({ children, isOpen }) => (
   <div
-    className={`absolute inset-0 z-[200] bg-ivory-50 flex flex-col transition-transform duration-300 ease-out will-change-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+    className={`absolute inset-0 z-[200] bg-ivory-50 dark:bg-[#141413] flex flex-col transition-transform duration-300 ease-out will-change-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
   >
     {children}
   </div>
@@ -85,46 +85,46 @@ const UserDashboardPage: React.FC<UserDashboardPageProps> = ({ authState, onLogo
           <div className="flex items-center gap-3 mb-6">
             <button
               onClick={onClose}
-              className="p-2 -ml-2 text-stone-400 hover:text-charcoal-800 transition-colors active:scale-90"
+              className="p-2 -ml-2 text-stone-400 hover:text-charcoal-800 dark:hover:text-ivory-50 transition-colors active:scale-90"
             >
               <Icons.ChevronLeft />
             </button>
-            <h2 className="font-serif text-2xl text-charcoal-900">Dashboard</h2>
+            <h2 className="font-serif text-2xl text-charcoal-900 dark:text-ivory-50">Dashboard</h2>
           </div>
 
-          <div className="bg-white rounded-[32px] p-6 shadow-sm border border-stone-100 mb-6 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gold-400/5 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
+          <div className="bg-white dark:bg-[#1c1b19] rounded-[32px] p-6 shadow-sm border border-stone-100 dark:border-[#33312e] mb-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gold-400/5 dark:bg-gold-400/10 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-110"></div>
             {isLoggedIn && user ? (
               <div className="relative z-10">
-                <div className="w-16 h-16 bg-charcoal-900 text-gold-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-charcoal-900/10">
+                <div className="w-16 h-16 bg-charcoal-900 dark:bg-gold-500/10 text-gold-400 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-charcoal-900/10">
                   <span className="text-2xl font-serif">{user.name.charAt(0)}</span>
                 </div>
-                <h3 className="text-xl font-serif text-charcoal-900 mb-1">{user.name}</h3>
+                <h3 className="text-xl font-serif text-charcoal-900 dark:text-ivory-50 mb-1">{user.name}</h3>
                 <p className="text-xs text-gold-600 font-bold uppercase tracking-[0.2em] mb-4">
                   Divine Soul
                 </p>
 
-                <div className="grid grid-cols-2 gap-y-3 pt-4 border-t border-stone-50">
+                <div className="grid grid-cols-2 gap-y-3 pt-4 border-t border-stone-50 dark:border-[#33312e]">
                   <div>
                     <span className="block text-[9px] uppercase tracking-widest text-stone-400">Place</span>
-                    <span className="text-xs font-medium text-charcoal-800">{user.location ? user.location.split(',')[0] : 'Not Set'}</span>
+                    <span className="text-xs font-medium text-charcoal-800 dark:text-stone-300">{user.location ? user.location.split(',')[0] : 'Not Set'}</span>
                   </div>
                   <div>
                     <span className="block text-[9px] uppercase tracking-widest text-stone-400">DOB</span>
-                    <span className="text-xs font-medium text-charcoal-800">{user.date || 'Not Set'}</span>
+                    <span className="text-xs font-medium text-charcoal-800 dark:text-stone-300">{user.date || 'Not Set'}</span>
                   </div>
                   <div>
                     <span className="block text-[9px] uppercase tracking-widest text-stone-400">Time</span>
-                    <span className="text-xs font-medium text-charcoal-800">{user.time || 'Not Set'}</span>
+                    <span className="text-xs font-medium text-charcoal-800 dark:text-stone-300">{user.time || 'Not Set'}</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center py-4">
-                <div className="w-16 h-16 bg-stone-50 text-stone-300 rounded-2xl flex items-center justify-center mb-4 mx-auto">
+                <div className="w-16 h-16 bg-stone-50 dark:bg-charcoal-800 text-stone-300 dark:text-stone-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                   <Icons.Users />
                 </div>
-                <h3 className="text-lg font-serif text-charcoal-800 mb-1">Guest Traveler</h3>
+                <h3 className="text-lg font-serif text-charcoal-800 dark:text-ivory-50 mb-1">Guest Traveler</h3>
                 <p className="text-xs text-stone-400">Sign in to sync your charts across devices.</p>
               </div>
             )}
@@ -135,11 +135,11 @@ const UserDashboardPage: React.FC<UserDashboardPageProps> = ({ authState, onLogo
           <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4 pl-1">Personal</div>
           <DashboardMenuItem icon={<Icons.Users />} label="My Profile" onClick={() => handleMenuClick('PROFILE')} />
           <DashboardMenuItem icon={<Icons.History />} label="Saved Charts" onClick={() => handleMenuClick('CHARTS')} />
-          <DashboardMenuItem icon={<div className="font-serif font-bold text-charcoal-900">@</div>} label="Login & Security" onClick={() => handleMenuClick('AUTH')} />
+          <DashboardMenuItem icon={<div className="font-serif font-bold text-charcoal-900 dark:text-ivory-50">@</div>} label="Login & Security" onClick={() => handleMenuClick('AUTH')} />
 
           <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4 mt-8 pl-1">Finance</div>
           <DashboardMenuItem icon={<Icons.Wallet />} label="My Wallet" onClick={() => handleMenuClick('WALLET')} />
-          <DashboardMenuItem icon={<div className="font-serif font-bold text-charcoal-900">₹</div>} label="Transactions" onClick={() => handleMenuClick('TRANSACTIONS')} />
+          <DashboardMenuItem icon={<div className="font-serif font-bold text-charcoal-900 dark:text-ivory-50">₹</div>} label="Transactions" onClick={() => handleMenuClick('TRANSACTIONS')} />
 
           <div className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-4 mt-8 pl-1">Experience</div>
           <DashboardMenuItem
@@ -151,7 +151,7 @@ const UserDashboardPage: React.FC<UserDashboardPageProps> = ({ authState, onLogo
           <DashboardMenuItem icon={<Icons.Sparkles />} label="Support" onClick={() => handleMenuClick('SUPPORT')} />
         </div>
 
-        <div className="p-6 bg-stone-50/50 border-t border-stone-100">
+        <div className="p-6 bg-stone-50/50 dark:bg-[#1c1b19]/50 border-t border-stone-100 dark:border-[#33312e]">
           {!isLoggedIn ? (
             <div className="space-y-3">
               <button

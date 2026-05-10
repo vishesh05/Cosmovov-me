@@ -178,13 +178,13 @@ const ShadbalaTool: React.FC<ShadbalaToolProps> = ({ analysis, profile, onBack }
 
     return (
         <div className="p-6 pb-32 fade-enter-active">
-            <button onClick={onBack} className="flex items-center gap-2 text-charcoal-500 mb-6 hover:text-gold-600 transition-colors">
+            <button onClick={onBack} className="flex items-center gap-2 text-charcoal-500 dark:text-stone-400 mb-6 hover:text-gold-600 dark:hover:text-gold-400 transition-colors">
                 <Icons.ChevronLeft />
                 <span className="text-xs font-bold uppercase tracking-widest">Back to Tools</span>
             </button>
 
-            <h2 className="text-2xl font-serif text-charcoal-900 mb-1">Shadbala Strength</h2>
-            <p className="text-charcoal-500 text-xs mb-8">Planetary Power Analysis</p>
+            <h2 className="text-2xl font-serif text-charcoal-900 dark:text-ivory-50 mb-1">Shadbala Strength</h2>
+            <p className="text-charcoal-500 dark:text-stone-400 text-xs mb-8">Planetary Power Analysis</p>
 
             <div className="space-y-4">
                 {results.map((item, idx) => {
@@ -193,39 +193,39 @@ const ShadbalaTool: React.FC<ShadbalaToolProps> = ({ analysis, profile, onBack }
                     const activeComponent = expandedComponents[item.planet];
                     
                     return (
-                        <div key={item.planet} className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'border-gold-400 shadow-xl' : 'border-stone-100 shadow-sm'}`}>
+                        <div key={item.planet} className={`bg-white dark:bg-[#1c1b19] rounded-2xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'border-gold-400 shadow-xl' : 'border-stone-100 dark:border-[#33312e] shadow-sm'}`}>
                             <button 
                                 onClick={() => handleExpandPlanet(item.planet)}
                                 className="w-full p-5 flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-4 flex-1">
-                                    <div className="text-xs font-bold text-stone-300 w-4">#{idx + 1}</div>
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-serif text-xl font-bold border transition-colors ${isExpanded ? 'bg-charcoal-900 text-gold-400 border-charcoal-900' : 'bg-stone-50 text-charcoal-600 border-stone-100'}`}>
+                                    <div className="text-xs font-bold text-stone-300 dark:text-stone-500 w-4">#{idx + 1}</div>
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-serif text-xl font-bold border transition-colors ${isExpanded ? 'bg-charcoal-900 text-gold-400 border-charcoal-900' : 'bg-stone-50 dark:bg-[#2a2826] text-charcoal-600 dark:text-[#e6e4df] border-stone-100 dark:border-[#33312e]'}`}>
                                         {item.planet.substring(0, 2)}
                                     </div>
                                     <div className="flex-1 text-left">
                                         <div className="flex justify-between items-center mb-1">
                                             <div>
-                                                <span className="text-base font-bold text-charcoal-900 mr-2">{item.planet}</span>
+                                                <span className="text-base font-bold text-charcoal-900 dark:text-ivory-50 mr-2">{item.planet}</span>
                                             </div>
-                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.total >= 350 ? 'bg-green-50 text-green-700' : 'bg-stone-50 text-stone-500'}`}>
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.total >= 350 ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-stone-50 dark:bg-stone-900/40 text-stone-500 dark:text-stone-400'}`}>
                                                 {Math.round(item.total)} pts
                                             </span>
                                         </div>
                                         <div className="flex flex-wrap gap-1.5 mb-2">
                                             {details?.dignity && details.dignity !== 'normal' && (
-                                                <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${details.dignity === 'exalted' ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-600'}`}>
+                                                <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${details.dignity === 'exalted' ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400'}`}>
                                                     {details.dignity}
                                                 </span>
                                             )}
                                             {details?.isRetro && (
-                                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-50 border border-blue-100 text-blue-600">Retrograde</span>
+                                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 text-blue-600 dark:text-blue-400">Retrograde</span>
                                             )}
                                             {details?.isCombust && (
-                                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-50 border border-orange-100 text-orange-600">Combust</span>
+                                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400">Combust</span>
                                             )}
                                             {details && (
-                                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-stone-50 border border-stone-100 text-stone-500">
+                                                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-stone-50 dark:bg-stone-900/40 border border-stone-100 dark:border-[#33312e] text-stone-500 dark:text-stone-400">
                                                     {details.rashi}
                                                 </span>
                                             )}
@@ -243,7 +243,7 @@ const ShadbalaTool: React.FC<ShadbalaToolProps> = ({ analysis, profile, onBack }
                                 </div>
                             </button>
                             {isExpanded && (
-                                <div className="bg-stone-50/50 p-5 border-t border-stone-100 animate-fade-in">
+                                <div className="bg-stone-50/50 dark:bg-transparent p-5 border-t border-stone-100 dark:border-[#33312e] animate-fade-in">
                                     <div className="grid grid-cols-1 gap-3">
                                         {[
                                             { key: 'sthana', val: item.components.sthana },
@@ -258,7 +258,7 @@ const ShadbalaTool: React.FC<ShadbalaToolProps> = ({ analysis, profile, onBack }
                                             return (
                                                 <div 
                                                     key={comp.key} 
-                                                    className={`bg-white rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${isCompExpanded ? 'border-gold-400 ring-1 ring-gold-100 shadow-md' : 'border-stone-100 shadow-sm hover:border-gold-200'}`}
+                                                    className={`bg-white dark:bg-[#1a1917] rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${isCompExpanded ? 'border-gold-400 ring-1 ring-gold-100 dark:ring-gold-900/30 shadow-md' : 'border-stone-100 dark:border-[#33312e] shadow-sm hover:border-gold-200'}`}
                                                     onClick={() => handleExpandComponent(item.planet, comp.key)}
                                                 >
                                                     <div className="p-3">
@@ -268,31 +268,31 @@ const ShadbalaTool: React.FC<ShadbalaToolProps> = ({ analysis, profile, onBack }
                                                                     {insight.label}
                                                                 </span>
                                                             </div>
-                                                            <span className="text-xs font-bold text-charcoal-800">{Math.round(comp.val)}</span>
+                                                            <span className="text-xs font-bold text-charcoal-800 dark:text-ivory-50">{Math.round(comp.val)}</span>
                                                         </div>
-                                                        <div className="w-full h-1 bg-stone-100 rounded-full overflow-hidden mb-2">
+                                                        <div className="w-full h-1 bg-stone-100 dark:bg-[#33312e] rounded-full overflow-hidden mb-2">
                                                             <div 
                                                                 className={`h-full rounded-full ${getStrengthColor(comp.val, 100)}`} 
                                                                 style={{ width: `${Math.min(100, comp.val)}%` }}
                                                             ></div>
                                                         </div>
-                                                        <p className="text-[10px] text-charcoal-500 font-medium italic truncate">
+                                                        <p className="text-[10px] text-charcoal-500 dark:text-stone-400 font-medium italic truncate">
                                                             "{insight.text}"
                                                         </p>
                                                     </div>
-                                                    <div className={`bg-ivory-50 border-t border-stone-100 transition-all duration-300 ease-in-out ${isCompExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                                    <div className={`bg-ivory-50 dark:bg-[#141413] border-t border-stone-100 dark:border-[#33312e] transition-all duration-300 ease-in-out ${isCompExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
                                                         <div className="p-4 space-y-4">
                                                             <div>
-                                                                <h4 className="text-[9px] uppercase tracking-widest text-gold-600 font-bold mb-1">Meaning</h4>
-                                                                <p className="text-xs text-charcoal-600 leading-relaxed font-light">{insight.concept}</p>
+                                                                <h4 className="text-[9px] uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold mb-1">Meaning</h4>
+                                                                <p className="text-xs text-charcoal-600 dark:text-stone-300 leading-relaxed font-light">{insight.concept}</p>
                                                             </div>
                                                             <div>
-                                                                <h4 className="text-[9px] uppercase tracking-widest text-gold-600 font-bold mb-1">Why {insight.statusLevel === 'high' ? 'High' : insight.statusLevel === 'mid' ? 'Moderate' : 'Low'}?</h4>
-                                                                <p className="text-xs text-charcoal-600 leading-relaxed font-light">{insight.detail}</p>
+                                                                <h4 className="text-[9px] uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold mb-1">Why {insight.statusLevel === 'high' ? 'High' : insight.statusLevel === 'mid' ? 'Moderate' : 'Low'}?</h4>
+                                                                <p className="text-xs text-charcoal-600 dark:text-stone-300 leading-relaxed font-light">{insight.detail}</p>
                                                             </div>
                                                             <div>
-                                                                <h4 className="text-[9px] uppercase tracking-widest text-gold-600 font-bold mb-1">Life Impact</h4>
-                                                                <p className="text-xs text-charcoal-600 leading-relaxed font-light italic">"{insight.impact}"</p>
+                                                                <h4 className="text-[9px] uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold mb-1">Life Impact</h4>
+                                                                <p className="text-xs text-charcoal-600 dark:text-stone-300 leading-relaxed font-light italic">"{insight.impact}"</p>
                                                             </div>
                                                         </div>
                                                     </div>

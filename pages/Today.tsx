@@ -31,6 +31,8 @@ function getTimeGreeting(firstName: string): string {
 }
 
 const Today: React.FC<TodayProps> = ({ analysis, profile, onOpenDashboard, authState }) => {
+    const [dates, setDates] = useState<{ date: Date; isToday: boolean }[]>([]);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
 
     // Dynamic greeting that updates across time boundaries
@@ -76,6 +78,29 @@ const Today: React.FC<TodayProps> = ({ analysis, profile, onOpenDashboard, authS
         return result;
     }, [analysis, profile]);
 
+    // Generate dates: 7 days before, today, 7 days after
+    useEffect(() => {
+        const generatedDates = [];
+        const today = new Date();
+        for (let i = -7; i <= 7; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() + i);
+            generatedDates.push({ date: d, isToday: i === 0 });
+        }
+        setDates(generatedDates);
+    }, []);
+
+    // Scroll today to the center on mount
+    useEffect(() => {
+        if (dates.length > 0 && scrollRef.current) {
+            const container = scrollRef.current;
+            const todayElement = container.querySelector('[data-istoday="true"]') as HTMLElement;
+            if (todayElement) {
+                const scrollLeft = todayElement.offsetLeft - (container.offsetWidth / 2) + (todayElement.offsetWidth / 2);
+                container.scrollTo({ left: scrollLeft, behavior: 'instant' });
+            }
+        }
+    }, [dates]);
 
     const lifeAreas = [
         { name: 'Love', icon: <Icons.Heart className="w-3 h-3" />, score: todayData.energyLevels.love.score, reason: todayData.energyLevels.love.description },
@@ -132,6 +157,35 @@ const Today: React.FC<TodayProps> = ({ analysis, profile, onOpenDashboard, authS
             </div>
 
 
+
+            {/* Horizontal Date Scroller */}
+            <h3 className="text-[10px] font-bold text-gold-600 uppercase tracking-widest mb-3 ml-2">Your Timeline</h3>
+            <div className="mb-8 -mx-6 px-6">
+                <div
+                    ref={scrollRef}
+                    className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory py-2 px-1 items-center"
+                >
+                    {dates.map((item, idx) => (
+                        <div
+                            key={idx}
+                            data-istoday={item.isToday}
+                            className={`flex flex-col items-center justify-center flex-shrink-0 w-12 h-14 rounded-[20px] snap-center cursor-pointer transition-all duration-300
+                                ${item.isToday
+                                    ? 'bg-gold-50 border border-gold-300 shadow-sm shadow-gold-900/5 transform scale-110 z-10'
+                                    : 'bg-white border border-stone-100 text-stone-400 hover:border-gold-200 hover:text-gold-600'
+                                }
+                            `}
+                        >
+                            <span className={`text-[10px] font-bold uppercase tracking-widest leading-none mb-1 opacity-60 ${item.isToday ? 'text-gold-700' : ''}`}>
+                                {item.date.toLocaleDateString('en-US', { weekday: 'short' })}
+                            </span>
+                            <span className={`text-lg font-serif leading-none ${item.isToday ? 'text-gold-700 font-bold' : ''}`}>
+                                {item.date.getDate()}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
             {/* Daily Overview */}
             <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-sm mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -253,20 +307,20 @@ const Today: React.FC<TodayProps> = ({ analysis, profile, onOpenDashboard, authS
                         </div>
 
                         {/* Top 3 Auspicious Windows */}
-                        <div className="bg-white rounded-3xl p-5 border border-stone-100 shadow-sm">
+                        <div className="bg-white dark:bg-[#1c1b19] rounded-3xl p-5 border border-stone-100 dark:border-[#33312e] shadow-sm">
                             <div className="text-[10px] text-gold-600 font-bold uppercase tracking-[0.2em] mb-4">Top Auspicious Windows</div>
                             <div className="space-y-3">
                                 {ph.top3Hours.map((slot, idx) => (
-                                    <div key={slot.hourOfDay} className={`flex items-center gap-3 p-3 rounded-xl ${idx === 0 ? 'bg-gold-50 border border-gold-100' : 'bg-stone-50'}`}>
-                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center font-serif font-bold text-sm flex-shrink-0 ${idx === 0 ? 'bg-gold-400 text-white' : 'bg-stone-200 text-charcoal-600'}`}>
+                                    <div key={slot.hourOfDay} className={`flex items-center gap-3 p-3 rounded-xl ${idx === 0 ? 'bg-gold-50 dark:bg-gold-900/20 border border-gold-100 dark:border-gold-900/30' : 'bg-stone-50 dark:bg-[#2a2826]'}`}>
+                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center font-serif font-bold text-sm flex-shrink-0 ${idx === 0 ? 'bg-gold-400 text-white' : 'bg-stone-200 dark:bg-[#33312e] text-charcoal-600 dark:text-[#e6e4df]'}`}>
                                             {idx + 1}
                                         </div>
                                         <div className="flex-1">
-                                            <div className="text-xs font-serif font-bold text-charcoal-900">{slot.startTime} – {slot.endTime}</div>
-                                            <div className="text-[9px] text-stone-500">{slot.planet} Hora · {slot.choghadiya}</div>
+                                            <div className="text-xs font-serif font-bold text-charcoal-900 dark:text-ivory-50">{slot.startTime} – {slot.endTime}</div>
+                                            <div className="text-[9px] text-stone-500 dark:text-stone-400">{slot.planet} Hora · {slot.choghadiya}</div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-xs font-bold text-charcoal-700">{slot.score}</div>
+                                            <div className="text-xs font-bold text-charcoal-700 dark:text-stone-300">{slot.score}</div>
                                             <div className="text-[8px] text-stone-400 uppercase tracking-wide">score</div>
                                         </div>
                                     </div>
@@ -276,13 +330,13 @@ const Today: React.FC<TodayProps> = ({ analysis, profile, onOpenDashboard, authS
 
                         {/* Times to Avoid */}
                         {ph.avoidHours.length > 0 && (
-                            <div className="bg-white rounded-3xl p-5 border border-stone-100 shadow-sm">
-                                <div className="text-[10px] text-red-500 font-bold uppercase tracking-[0.2em] mb-3">Times to Avoid</div>
+                            <div className="bg-white dark:bg-[#1c1b19] rounded-3xl p-5 border border-stone-100 dark:border-[#33312e] shadow-sm">
+                                <div className="text-[10px] text-red-500 dark:text-red-400 font-bold uppercase tracking-[0.2em] mb-3">Times to Avoid</div>
                                 <div className="space-y-2">
                                     {ph.avoidHours.map((slot) => (
-                                        <div key={slot.hourOfDay} className="flex items-center justify-between bg-red-50 rounded-xl px-4 py-3 border border-red-100">
+                                        <div key={slot.hourOfDay} className="flex items-center justify-between bg-red-50 dark:bg-red-900/20 rounded-xl px-4 py-3 border border-red-100 dark:border-red-900/30">
                                             <div>
-                                                <div className="text-xs font-serif font-bold text-charcoal-900">{slot.startTime} – {slot.endTime}</div>
+                                                <div className="text-xs font-serif font-bold text-charcoal-900 dark:text-ivory-50">{slot.startTime} – {slot.endTime}</div>
                                                 <div className="text-[9px] text-red-400 font-medium">{slot.isRahuKaal ? 'Rahu Kaal' : slot.isYamaganda ? 'Yamaganda' : 'Gulika Kaal'}</div>
                                             </div>
                                             <div className="text-[9px] text-red-400 font-bold uppercase tracking-wide">Avoid</div>
@@ -396,11 +450,16 @@ const Today: React.FC<TodayProps> = ({ analysis, profile, onOpenDashboard, authS
             {/* Daily Advice/Ritual */}
             <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-sm animate-fade-in" style={{ animationDelay: '0.5s' }}>
                 <h3 className="text-[10px] font-bold text-gold-600 uppercase tracking-widest mb-3">Daily Ritual</h3>
-                <div>
-                    <h4 className="font-serif text-charcoal-900 text-lg mb-1">{todayData.dailyRitual.title}</h4>
-                    <p className="text-xs text-stone-500 leading-relaxed font-medium">
-                        {todayData.dailyRitual.description}
-                    </p>
+                <div className="flex gap-4 items-start">
+                    <div className="bg-gold-50 p-2.5 rounded-2xl flex-shrink-0">
+                        <Icons.Sparkles className="w-5 h-5 text-gold-600" />
+                    </div>
+                    <div>
+                        <h4 className="font-serif text-charcoal-900 text-lg mb-1">{todayData.dailyRitual.title}</h4>
+                        <p className="text-xs text-stone-500 leading-relaxed font-medium">
+                            {todayData.dailyRitual.description}
+                        </p>
+                    </div>
                 </div>
             </div>
 

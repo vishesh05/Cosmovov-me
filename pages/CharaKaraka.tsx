@@ -53,33 +53,33 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
   };
 
   return (
-    <div className="bg-ivory-50 min-h-screen font-sans fade-enter-active p-6 pb-32">
+    <div className="bg-ivory-50 dark:bg-[#141413] min-h-screen font-sans fade-enter-active p-6 pb-32">
       {/* Header */}
-      <button onClick={onBack} className="flex items-center gap-2 text-charcoal-500 mb-6 hover:text-gold-600 transition-colors">
+      <button onClick={onBack} className="flex items-center gap-2 text-charcoal-500 dark:text-stone-400 mb-6 hover:text-gold-600 dark:hover:text-gold-400 transition-colors">
         <Icons.ChevronLeft className="w-4 h-4" />
         <span className="text-xs font-bold uppercase tracking-widest">Back to Tools</span>
       </button>
-      <h1 className="text-2xl font-serif text-charcoal-900 mb-2 mt-2">Chara Karakas</h1>
-      <p className="text-xs text-charcoal-500 mb-8">Jaimini Movable Significators of Your Soul</p>
+      <h1 className="text-2xl font-serif text-charcoal-900 dark:text-ivory-50 mb-2 mt-2">Chara Karakas</h1>
+      <p className="text-xs text-charcoal-500 dark:text-stone-400 mb-8">Jaimini Movable Significators of Your Soul</p>
 
       <div className="space-y-6">
         {/* Info Card */}
-        <div className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden flex flex-col transition-all">
+        <div className="bg-white dark:bg-[#1c1b19] rounded-3xl border border-stone-100 dark:border-[#33312e] shadow-sm overflow-hidden flex flex-col transition-all">
           <button 
             onClick={() => setInfoExpanded(!infoExpanded)}
-            className="flex items-center justify-between p-5 text-left w-full hover:bg-stone-50 transition-colors"
+            className="flex items-center justify-between p-5 text-left w-full hover:bg-stone-50 dark:hover:bg-[#2a2826] transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="text-gold-600 bg-gold-50 p-2 rounded-full">
+              <div className="text-gold-600 bg-gold-50 dark:bg-gold-900/20 p-2 rounded-full">
                 <Icons.Activity className="w-4 h-4" />
               </div>
-              <span className="font-bold text-charcoal-900">What are Chara Karakas?</span>
+              <span className="font-bold text-charcoal-900 dark:text-ivory-50">What are Chara Karakas?</span>
             </div>
             <Icons.ChevronDown className={`w-5 h-5 text-gold-600 transition-transform duration-300 ${infoExpanded ? 'rotate-180' : ''}`} />
           </button>
           
           <div className={`overflow-hidden transition-all duration-300 ${infoExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="p-5 pt-0 text-charcoal-600 text-sm leading-relaxed border-t border-stone-50 mt-2">
+            <div className="p-5 pt-0 text-charcoal-600 dark:text-stone-400 text-sm leading-relaxed border-t border-stone-50 dark:border-[#33312e] mt-2">
               Chara Karakas are seven special planetary roles assigned uniquely to your birth chart. Each planet takes on a role based on its exact degree, revealing the cosmic blueprint of your soul, relationships, and life purpose.
             </div>
           </div>
@@ -90,8 +90,8 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
           <button
             onClick={() => setIs8KarakaSystem(false)}
             className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${!is8KarakaSystem 
-                  ? 'bg-charcoal-900 text-gold-400 shadow-lg'
-                  : 'bg-white text-charcoal-600 border border-stone-200 hover:border-gold-300'
+                  ? 'bg-charcoal-900 dark:bg-[#1a1917] text-gold-400 shadow-lg border border-transparent dark:border-[#33312e]'
+                  : 'bg-white dark:bg-[#1c1b19] text-charcoal-600 dark:text-stone-400 border border-stone-200 dark:border-[#33312e] hover:border-gold-300'
               }`}
           >
             7 KARAKAS
@@ -99,8 +99,8 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
           <button
             onClick={() => setIs8KarakaSystem(true)}
              className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${is8KarakaSystem 
-                  ? 'bg-charcoal-900 text-gold-400 shadow-lg'
-                  : 'bg-white text-charcoal-600 border border-stone-200 hover:border-gold-300'
+                  ? 'bg-charcoal-900 dark:bg-[#1a1917] text-gold-400 shadow-lg border border-transparent dark:border-[#33312e]'
+                  : 'bg-white dark:bg-[#1c1b19] text-charcoal-600 dark:text-stone-400 border border-stone-200 dark:border-[#33312e] hover:border-gold-300'
               }`}
           >
             8 KARAKAS
@@ -114,20 +114,20 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
               key={k.karakaName} 
               className={`snap-start flex-shrink-0 w-24 rounded-2xl flex flex-col items-center justify-center p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-1 ${
                 i === 0 
-                  ? 'bg-gold-50/80 border border-gold-200 shadow-md shadow-gold-100/50' 
-                  : 'bg-white border border-stone-100 shadow-sm'
+                  ? 'bg-gold-50/80 dark:bg-gold-900/20 border border-gold-200 dark:border-gold-800 shadow-md shadow-gold-100/50 dark:shadow-gold-900/10' 
+                  : 'bg-white dark:bg-[#1c1b19] border border-stone-100 dark:border-[#33312e] shadow-sm'
               }`}
             >
-              <div className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${i === 0 ? 'text-gold-700' : 'text-charcoal-400'}`}>
+              <div className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${i === 0 ? 'text-gold-700 dark:text-gold-400' : 'text-charcoal-400 dark:text-stone-500'}`}>
                 {getAbbreviation(k.karakaName)}
               </div>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium mb-2 shadow-sm ${
-                i === 0 ? 'bg-white text-gold-600 border border-gold-200' : 'bg-ivory-50 text-charcoal-600 border border-stone-200'
+                i === 0 ? 'bg-white dark:bg-[#1c1b19] text-gold-600 dark:text-gold-400 border border-gold-200 dark:border-gold-800' : 'bg-ivory-50 dark:bg-[#2a2826] text-charcoal-600 dark:text-stone-300 border border-stone-200 dark:border-[#33312e]'
               }`}>
                 {k.planetName.substring(0, 2)}
               </div>
-              <div className="text-sm font-bold text-charcoal-900">{k.planetName}</div>
-              <div className="text-[10px] text-charcoal-500 mt-1 font-mono bg-stone-50 px-1.5 py-0.5 rounded-md">
+              <div className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">{k.planetName}</div>
+              <div className="text-[10px] text-charcoal-500 dark:text-stone-400 mt-1 font-mono bg-stone-50 dark:bg-stone-900/40 px-1.5 py-0.5 rounded-md">
                 {formatDegree(k.signDegree)}
               </div>
             </div>
@@ -170,26 +170,26 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
 
         {/* Remaining Karakas List */}
         <div>
-          <h3 className="text-sm font-bold text-charcoal-900 mb-4 px-1">Life Area Significators</h3>
+          <h3 className="text-sm font-bold text-charcoal-900 dark:text-ivory-50 mb-4 px-1">Life Area Significators</h3>
           <div className="space-y-2">
             {karakas.slice(1).map((k) => (
-              <div key={k.karakaName} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden transition-all duration-300">
+              <div key={k.karakaName} className="bg-white dark:bg-[#1c1b19] rounded-2xl border border-stone-100 dark:border-[#33312e] shadow-sm overflow-hidden transition-all duration-300">
                 <button 
                   onClick={() => toggleExpand(k.karakaName)}
-                  className="w-full p-4 flex items-center justify-between text-left hover:bg-stone-50 transition-colors"
+                  className="w-full p-4 flex items-center justify-between text-left hover:bg-stone-50 dark:hover:bg-[#2a2826] transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="w-8 h-8 rounded-full bg-ivory-50 text-charcoal-500 flex items-center justify-center text-xs font-bold border border-stone-200">
+                      <span className="w-8 h-8 rounded-full bg-ivory-50 dark:bg-[#2a2826] text-charcoal-500 dark:text-stone-400 flex items-center justify-center text-xs font-bold border border-stone-200 dark:border-[#33312e]">
                         {getAbbreviation(k.karakaName)}
                       </span>
-                      <span className="text-sm font-bold text-charcoal-900">{k.karakaName.replace('karaka', '')}</span>
+                      <span className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">{k.karakaName.replace('karaka', '')}</span>
                     </div>
                   </div>
                   
                   <div className="flex-1 flex justify-center items-center gap-2">
-                    <span className="text-sm font-bold text-charcoal-800">{k.planetName}</span>
-                    <span className="text-[10px] text-charcoal-400 font-mono bg-stone-50 px-1.5 py-0.5 rounded-md hidden sm:inline-block">
+                    <span className="text-sm font-bold text-charcoal-800 dark:text-ivory-50">{k.planetName}</span>
+                    <span className="text-[10px] text-charcoal-400 dark:text-stone-500 font-mono bg-stone-50 dark:bg-stone-900/40 px-1.5 py-0.5 rounded-md hidden sm:inline-block">
                       {formatDegree(k.signDegree)}
                     </span>
                   </div>
@@ -200,9 +200,9 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
                 </button>
                 
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${expandedCards[k.karakaName] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <div className="p-5 bg-ivory-50 border-t border-stone-100">
+                  <div className="p-5 bg-ivory-50 dark:bg-[#141413] border-t border-stone-100 dark:border-[#33312e]">
                     <div className="flex justify-between items-center mb-3">
-                      <div className="text-[10px] text-charcoal-500 uppercase tracking-widest font-bold">
+                      <div className="text-[10px] text-charcoal-500 dark:text-stone-400 uppercase tracking-widest font-bold">
                         {k.karakaName === 'Amatyakaraka' && 'Career & Mind'}
                         {k.karakaName === 'Bhratrikaraka' && 'Siblings & Courage'}
                         {k.karakaName === 'Matrikaraka' && 'Mother & Nurturing'}
@@ -211,11 +211,11 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
                         {k.karakaName === 'Darakaraka' && 'Spouse & Partnerships'}
                         {k.karakaName === 'Pitrukaraka' && 'Father & Ancestors'}
                       </div>
-                      <div className="text-[10px] text-charcoal-500 bg-white border border-stone-200 px-1.5 py-0.5 rounded-md font-mono sm:hidden">
+                      <div className="text-[10px] text-charcoal-500 dark:text-stone-400 bg-white dark:bg-[#1c1b19] border border-stone-200 dark:border-[#33312e] px-1.5 py-0.5 rounded-md font-mono sm:hidden">
                         {formatDegree(k.signDegree)}
                       </div>
                     </div>
-                    <p className="text-sm text-charcoal-700 leading-relaxed">
+                    <p className="text-sm text-charcoal-700 dark:text-stone-300 leading-relaxed">
                       {CHARA_KARAKA_INTERPRETATIONS[k.karakaName]?.[k.planetName] || "Unique cosmic imprint shaping this life area. This planet's nature dictates how you experience these specific themes."}
                     </p>
                   </div>
@@ -227,16 +227,16 @@ const CharaKarakaPage: React.FC<CharaKarakaPageProps> = ({ analysis, profile, on
 
         {/* Interactions */}
         {interactions.length > 0 && (
-          <div className="bg-white rounded-3xl p-6 border border-stone-100 shadow-sm mt-6">
-            <h3 className="text-sm font-bold text-charcoal-900 mb-5 flex items-center gap-2">
+          <div className="bg-white dark:bg-[#1c1b19] rounded-3xl p-6 border border-stone-100 dark:border-[#33312e] shadow-sm mt-6">
+            <h3 className="text-sm font-bold text-charcoal-900 dark:text-ivory-50 mb-5 flex items-center gap-2">
               <span className="text-gold-500"><Icons.Sparkles className="w-4 h-4" /></span>
               Karaka Interactions
             </h3>
             <div className="space-y-4">
               {interactions.map((interaction, i) => (
-                <div key={i} className="bg-ivory-50 p-5 rounded-2xl border border-stone-100 hover:border-gold-200 transition-colors">
-                  <h4 className="text-sm font-bold text-charcoal-900 mb-2">{interaction.title}</h4>
-                  <p className="text-xs text-charcoal-600 leading-relaxed">{interaction.text}</p>
+                <div key={i} className="bg-ivory-50 dark:bg-[#2a2826] p-5 rounded-2xl border border-stone-100 dark:border-[#33312e] hover:border-gold-200 dark:hover:border-gold-800 transition-colors">
+                  <h4 className="text-sm font-bold text-charcoal-900 dark:text-ivory-50 mb-2">{interaction.title}</h4>
+                  <p className="text-xs text-charcoal-600 dark:text-stone-300 leading-relaxed">{interaction.text}</p>
                 </div>
               ))}
             </div>

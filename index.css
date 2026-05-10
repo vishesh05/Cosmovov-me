@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Global styles */
 body {
   margin: 0;
@@ -159,12 +155,6 @@ body {
   border-color: var(--dm-border) !important;
 }
 
-:root.dark input.bg-transparent,
-:root.dark select.bg-transparent,
-:root.dark textarea.bg-transparent {
-  background-color: transparent !important;
-}
-
 :root.dark input::placeholder {
   color: var(--dm-text-faint) !important;
 }
@@ -172,31 +162,6 @@ body {
 /* Dark mode for specific app elements */
 :root.dark .bg-charcoal-900 {
   background-color: #0a0a09 !important;
-}
-
-:root.dark .bg-\[\#fdfcfb\] {
-  background-color: var(--dm-bg) !important;
-}
-
-:root.dark .border-stone-200\/60 {
-  border-color: var(--dm-border) !important;
-}
-
-:root.dark .bg-gold-50\/20 {
-  background-color: rgba(51, 43, 30, 0.4) !important;
-}
-
-:root.dark .border-gold-200\/50 {
-  border-color: rgba(197, 160, 89, 0.2) !important;
-}
-
-:root.dark .from-white {
-  --tw-gradient-from: var(--dm-surface) var(--tw-gradient-from-position) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-}
-
-:root.dark .to-white\/0 {
-  --tw-gradient-to: rgba(28, 27, 25, 0) var(--tw-gradient-to-position) !important;
 }
 
 :root.dark .hover\:bg-stone-50:hover {

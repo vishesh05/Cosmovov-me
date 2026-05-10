@@ -83,7 +83,7 @@ const NorthIndianChart: React.FC<ChartProps> = ({ houses, planetDetails, variant
           return (
             <g key={i}>
               {/* Planet Text - Size 8 */}
-              <text x={xPos} y={yPos} fontSize="8" fill={p.isOuterPlanet ? "#7dd3fc" : "#1A1816"} fontWeight={p.isOuterPlanet ? "600" : "500"} textAnchor="middle" className="font-sans">
+              <text x={xPos} y={yPos} fontSize="8" fill={p.isOuterPlanet ? "#7dd3fc" : "currentColor"} fontWeight={p.isOuterPlanet ? "600" : "500"} textAnchor="middle" className="font-sans text-charcoal-900 dark:text-ivory-50">
                 {p.name}
                 {p.isRetro && <tspan fontSize="8" fill="#dc2626" dy="-2" dx="0.5">ᴿ</tspan>}
               </text>
@@ -112,7 +112,7 @@ const NorthIndianChart: React.FC<ChartProps> = ({ houses, planetDetails, variant
 
   const containerStyles = variant === 'plain'
     ? "w-full aspect-square relative p-2"
-    : "w-full aspect-square relative bg-ivory-50 rounded-full border border-gold-500/20 shadow-xl shadow-gold-500/5 p-6";
+    : "w-full aspect-square relative bg-ivory-50 dark:bg-[#141413] rounded-full border border-gold-500/20 dark:border-gold-500/10 shadow-xl shadow-gold-500/5 p-6";
 
   return (
     <div className={containerStyles}>

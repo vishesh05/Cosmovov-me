@@ -1,60 +1,57 @@
+
 import { BirthChartAnalysis, UserProfile, AdviceCard, DashaPeriod, DivisionalChart } from "../types";
 import { calculateBirthChart, calculateShadbala } from "./astrologyEngine";
 import { calculateYogas } from "./yogaEngine";
 import { calculatePanchang } from "./panchangSystem";
 import { calculateAshtakvarga } from "./ashtakvargaEngine";
-import { calculateTransits } from "./transitEngine";
-import { AIContextBuilder } from "./aiContextBuilder";
-import { supabase } from "./supabase";
 
-// No API keys in client code — all AI calls go through server-side Edge Function
+const GROQ_API_KEY = process.env.API_KEY || process.env.GROQ_API_KEY;
 
-async function generateContent(prompt: string, isJson: boolean = false, maxTokens: number = 800, temperature: number = 0.8): Promise<string> {
-    const messages = [{ role: "user", content: prompt }];
-    const body: any = {
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-    };
-    if (isJson) body.response_format = { type: "json_object" };
-    
-    const { data, error } = await supabase.functions.invoke('chat-proxy', {
-        body,
+export async function fetchGroqJSON(prompt: string, maxTokens: number = 200): Promise<any> {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${GROQ_API_KEY}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
+            response_format: { type: "json_object" },
+            max_completion_tokens: maxTokens
+        })
     });
-
-    if (error) {
-        throw new Error(`AI Service Error: ${error.message}`);
-    }
-    return data.content;
+    if (!res.ok) throw new Error("Groq API Error: " + res.statusText);
+    const data = await res.json();
+    return JSON.parse(data.choices[0].message.content);
 }
 
-async function chatContent(systemPrompt: string, history: any[], userPrompt: string, maxTokens: number = 800, temperature: number = 0.8): Promise<string> {
-    const messages = [
-        { role: "system", content: systemPrompt },
-        ...history,
-        { role: "user", content: userPrompt }
-    ];
-    const body: any = {
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-    };
+export async function fetchGroqText(prompt: string, maxTokens: number = 800, systemPrompt?: string, history?: any[]): Promise<string> {
+    const messages = [];
+    if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
+    if (history) {
+        for (const h of history) {
+            messages.push({ role: h.role === 'model' ? 'assistant' : h.role, content: h.parts[0].text });
+        }
+    }
+    messages.push({ role: "user", content: prompt });
 
-    const { data, error } = await supabase.functions.invoke('chat-proxy', {
-        body,
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${GROQ_API_KEY}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: messages,
+            max_completion_tokens: maxTokens,
+            temperature: 0.7
+        })
     });
-
-    if (error) {
-        throw new Error(`AI Service Error: ${error.message}`);
-    }
-    return data.content;
-}
-
-function signAbbr(sign: string): string {
-    return sign ? sign.substring(0, 3) : '';
-}
-function abbr(str: string): string {
-    return str ? str.substring(0, 3) : '';
+    if (!res.ok) throw new Error("Groq API Error: " + res.statusText);
+    const data = await res.json();
+    return data.choices[0].message.content;
 }
 
 // --- Helper Functions ---
@@ -197,9 +194,8 @@ export async function generateBirthChartAnalysis(profile: UserProfile): Promise<
     };
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, true));
-        if (responseText) {
-            const parsed = JSON.parse(responseText);
+        const parsed = await callWithRetry(() => fetchGroqJSON(prompt, 600));
+        if (parsed) {
             predictions = { ...predictions, ...parsed };
         }
     } catch (e) {
@@ -230,22 +226,115 @@ function getCurrentDashaChain(dashas: DashaPeriod[]): string {
 }
 
 
-// --- Build Compact Context using AIContextBuilder ---
-function buildCompactContext(
-    intent: string,
-    analysis: BirthChartAnalysis,
-    profile: UserProfile,
-    shadbala?: any[],
-    yogas?: any[],
-    ashtakvarga?: any,
-    transits?: any[]
-): string {
-    return AIContextBuilder.compile(intent, analysis, profile, {
-        shadbala,
-        yogas,
-        ashtakvarga,
-        transits
-    });
+// ============================================================
+// OPTIMIZED AI CHAT SYSTEM — Low Token, No JSON, Compact Format
+// ============================================================
+
+// --- Planet Abbreviation Map ---
+const P_ABBR: { [key: string]: string } = {
+    'Sun': 'Su', 'Moon': 'Mo', 'Mars': 'Ma', 'Mercury': 'Me',
+    'Jupiter': 'Ju', 'Venus': 'Ve', 'Saturn': 'Sa', 'Rahu': 'Ra', 'Ketu': 'Ke'
+};
+
+const SIGN_ABBR: { [key: string]: string } = {
+    'Aries': 'Ar', 'Taurus': 'Ta', 'Gemini': 'Ge', 'Cancer': 'Cn',
+    'Leo': 'Le', 'Virgo': 'Vi', 'Libra': 'Li', 'Scorpio': 'Sc',
+    'Sagittarius': 'Sg', 'Capricorn': 'Cp', 'Aquarius': 'Aq', 'Pisces': 'Pi'
+};
+
+function abbr(planet: string): string { return P_ABBR[planet] || planet; }
+function signAbbr(sign: string): string { return SIGN_ABBR[sign] || sign; }
+
+// --- Intent Detection ---
+
+const INTENT_KEYWORDS = {
+    MARRIAGE: ['marriage', 'shaadi', 'vivah', 'husband', 'wife', 'spouse', 'wedding', 'when will i marry', 'life partner', 'married', 'shadi', 'dulha', 'dulhan', 'kundali milan', '7th house', 'navamsa'],
+    CAREER: ['career', 'job', 'naukri', 'business', 'promotion', 'salary', 'work', 'profession', 'office', 'interview', 'entrepreneur', 'startup', 'government job', 'sarkari', '10th house'],
+    LOVE: ['love', 'boyfriend', 'girlfriend', 'crush', 'pyaar', 'affair', 'breakup', 'relationship', 'ex', 'does he like me', 'propose', 'dating', '5th house'],
+    CHILDREN: ['children', 'baby', 'pregnancy', 'pregnant', 'santaan', 'bachha', 'ivf', 'conceive', 'child birth', 'son', 'daughter', 'putra', 'fertility'],
+    FINANCE: ['money', 'wealth', 'income', 'salary', 'loan', 'debt', 'paisa', 'rich', 'savings', 'investment', 'property', 'financial', 'loss', 'profit', 'stocks'],
+    HEALTH: ['health', 'bimari', 'disease', 'illness', 'sick', 'hospital', 'operation', 'surgery', 'medicine', 'doctor', 'pain', 'recovery', 'weakness', 'anxiety'],
+    TRAVEL: ['foreign', 'abroad', 'travel', 'visa', 'usa', 'canada', 'uk', 'immigration', 'settle outside', 'videsh', 'overseas', 'nri', 'relocation', 'passport'],
+    EDUCATION: ['education', 'study', 'exam', 'pass', 'fail', 'result', 'college', 'university', 'degree', 'school', 'padhai', 'marks', 'upsc', 'jee', 'neet'],
+    FAMILY: ['family', 'parents', 'mother', 'father', 'brother', 'sister', 'in-laws', 'property', 'home', 'harmony', 'family problem', 'relatives', 'ghar'],
+    SPIRITUAL: ['spiritual', 'karma', 'past life', 'moksha', 'meditation', 'dharma', 'guru', 'pilgrimage', 'luck', 'bhagya', 'destiny', 'remedies', 'mantra']
+};
+
+function detectIntent(message: string): keyof typeof INTENT_KEYWORDS | 'GENERAL' {
+    const lowerMsg = message.toLowerCase();
+    for (const [intent, keywords] of Object.entries(INTENT_KEYWORDS)) {
+        if (keywords.some(keyword => lowerMsg.includes(keyword))) {
+            return intent as keyof typeof INTENT_KEYWORDS;
+        }
+    }
+    return 'GENERAL';
+}
+
+// --- Compact Planet String ---
+function compactPlanet(analysis: BirthChartAnalysis, name: string): string {
+    const p = analysis.planetaryDetails.find(pl => pl.name === name);
+    if (!p) return '';
+    const h = analysis.houses.find(h => h.planets.includes(name))?.houseNumber || 0;
+    const rx = p.isRetro ? ' (Retrograde)' : '';
+    const cb = p.isCombust ? ' (Combust)' : '';
+    return `${name} is in ${h}th House (${p.rashi})${rx}${cb}`;
+}
+
+// --- Compact House String ---
+function compactHouse(analysis: BirthChartAnalysis, num: number): string {
+    const h = analysis.houses.find(h => h.houseNumber === num);
+    if (!h) return '';
+    const planets = h.planets.length > 0 ? h.planets.join(', ') : 'no planets';
+    return `${num}th House is ${h.sign} with ${planets}`;
+}
+
+// --- Intent-Based Relevant Houses/Planets Map ---
+const INTENT_DATA_MAP: { [key: string]: { houses: number[], planets: string[], charts: string[] } } = {
+    MARRIAGE:  { houses: [7, 2, 8], planets: ['Venus', 'Jupiter', 'Mars', 'Rahu'], charts: ['D9'] },
+    CAREER:   { houses: [10, 6, 2], planets: ['Saturn', 'Sun', 'Mercury', 'Jupiter'], charts: ['D10'] },
+    LOVE:     { houses: [5, 7, 11], planets: ['Venus', 'Moon', 'Mars', 'Rahu'], charts: [] },
+    CHILDREN: { houses: [5, 9], planets: ['Jupiter', 'Moon', 'Venus'], charts: ['D7'] },
+    FINANCE:  { houses: [2, 11, 9], planets: ['Jupiter', 'Mercury', 'Venus', 'Rahu'], charts: [] },
+    HEALTH:   { houses: [1, 6, 8], planets: ['Saturn', 'Mars', 'Moon', 'Sun'], charts: [] },
+    TRAVEL:   { houses: [9, 12, 4], planets: ['Moon', 'Rahu', 'Jupiter'], charts: [] },
+    EDUCATION:{ houses: [4, 5, 9], planets: ['Mercury', 'Jupiter', 'Ketu'], charts: [] },
+    FAMILY:   { houses: [4, 9, 3], planets: ['Moon', 'Sun', 'Mars', 'Venus'], charts: [] },
+    SPIRITUAL:{ houses: [9, 12, 5], planets: ['Jupiter', 'Ketu', 'Rahu', 'Moon'], charts: [] },
+    GENERAL:  { houses: [1, 7, 10], planets: ['Sun', 'Moon', 'Jupiter', 'Saturn'], charts: [] }
+};
+
+// --- Build Compact Context (THE CORE OPTIMIZATION) ---
+function buildCompactContext(intent: string, analysis: BirthChartAnalysis, profile: UserProfile): string {
+    const map = INTENT_DATA_MAP[intent] || INTENT_DATA_MAP['GENERAL'];
+
+    // Dasha chain
+    const currentChain = getCurrentDashaChain(analysis.dashas);
+    const splitChain = currentChain.split(' > ');
+    const maha = splitChain[0]?.split(' ')[0] || '?';
+    const antar = splitChain[1]?.split(' ')[0] || '?';
+
+    // Relevant houses (compact)
+    const houseLine = map.houses.map(h => compactHouse(analysis, h)).join('; ');
+
+    // Relevant planets (compact)
+    const planetLine = map.planets.map(p => compactPlanet(analysis, p)).filter(Boolean).join('; ');
+
+    // Divisional chart ascendants (if relevant)
+    let chartLine = '';
+    if (map.charts.length > 0) {
+        chartLine = map.charts
+            .map(c => `${c} Ascendant is ${analysis.divisionalCharts[c]?.ascendant || 'Unknown'}`)
+            .join(', ');
+    }
+    
+    // Assemble
+    let context = `Ascendant is ${analysis.ascendant}, Moon is in ${analysis.moonSign || 'Unknown'}.`;
+    context += `\nCurrent Dasha: ${maha} Maha-dasha and ${antar} Antar-dasha.`;
+    context += `\nRelevant Houses: ${houseLine}.`;
+    context += `\nRelevant Planets: ${planetLine}.`;
+    if (chartLine) context += `\nDivisional Charts: ${chartLine}.`;
+
+    return context;
 }
 
 // --- Session Context Cache ---
@@ -264,22 +353,119 @@ function getCachedBaseContext(analysis: BirthChartAnalysis, profile: UserProfile
     const splitChain = currentChain.split(' > ');
     const maha = splitChain[0]?.split(' ')[0] || '?';
     const antar = splitChain[1]?.split(' ')[0] || '?';
-    const base = `${profile.name} | Asc:${signAbbr(analysis.ascendant)} Mo:${signAbbr(analysis.moonSign || '')} | ${abbr(maha)}-${abbr(antar)} dasha`;
+    const base = `${profile.name} | Ascendant:${analysis.ascendant} Moon:${analysis.moonSign || ''} | ${maha}-${antar} dasha`;
     sessionContextCache.set(key, base);
     return base;
 }
 
 // --- System Prompt (Plain Text, NO JSON) ---
-const CHAT_SYSTEM_PROMPT = `You are an incredibly wise, authentic, and profoundly analytical Vedic Astrologer. You are directly speaking with the native. You have been provided with a highly targeted astrological dossier that ONLY includes the houses, planets, and divisional charts highly relevant to the user's specific query topic.
+const CHAT_SYSTEM_PROMPT = `You are Jyoti — a warm, perceptive Vedic astrologer. You have real conversations. You listen. You respond to the actual person in front of you, not a generic version of their question.
 
-CRITICAL INSTRUCTIONS:
-1. Speak Naturally: DO NOT use rigid lists, markdown formatting, or numbered sections. Weave your analysis into a continuous, flowing, and engaging narrative. Talk directly to the user like a real guru sitting across from them.
-2. Show Your Work: Always cite the astrological reasons for your statements. Explain how the targeted data (e.g., specific divisional charts like D10 or D9, specific houses, and current Dashas) leads to your conclusion.
-3. Analyze Holistically: The context has been pre-filtered for relevance. Combine the Lagna Lord, the relevant houses, the specific Divisional charts, the Dashas, and the Transits to form a hyper-focused and highly accurate answer to their query.
-4. Precision & Timeframes: When giving predictions, mention the exact Dasha periods and their dates as provided in the context.
-5. Compassionate Tone: Be highly empathetic. Even when pointing out difficult placements, frame them as karmic lessons or opportunities for growth.
+================================================================
+RULE 1 — READ THE CONVERSATION FIRST
+================================================================
+Read the full conversation before replying.
 
-Never invent planetary positions. Only use what is in the provided context block. Give a complete, deeply analyzed reading of about 3 to 4 paragraphs.`;
+If the user said "yes", "no", or one word — go deeper on the same topic. Never jump to something new.
+
+If they shared something personal — health, stress, fear — your first sentence must reflect that. They need to feel heard before they feel advised.
+
+NEVER do this:
+User: "yes I have health issues"
+Reply: "You are entering a lucky phase. Jupiter boosts finances."
+
+ALWAYS do this:
+User: "yes I have health issues"
+Reply: Acknowledge the struggle first. Connect it to one planet. Give a timing note. Ask one real question.
+
+================================================================
+RULE 2 — ONE PLANET ONLY
+================================================================
+Pick the single most relevant planet or house. Go deep on it.
+Never mention more than one planet per response.
+Less is more personal.
+
+================================================================
+RULE 3 — TRANSLATE JARGON IMMEDIATELY
+================================================================
+Every planet or Dasha name must be followed by what it means in plain human terms in the same sentence.
+
+Not: "Mercury Antardasha begins."
+But: "Mercury's phase begins — a time that sharpens thinking and opens up important conversations."
+
+================================================================
+RULE 4 — RESPONSE LENGTH (STRICT)
+================================================================
+Total response: 80 to 100 words. Never more. Never less.
+
+PARAGRAPH 1 — 45 to 50 words:
+- Open by acknowledging what the user said
+- One planet or house, explained in human terms
+- Personal, warm, direct
+
+PARAGRAPH 2 — 35 to 45 words:
+- One timing note with a specific window ("next 3 months" not "soon")
+- End with the closing question — see Rule 5
+
+No headers. No bullets. No bold. No asterisks. Plain prose only.
+
+================================================================
+RULE 5 — CLOSING QUESTION (STRICTEST RULE)
+================================================================
+Every response ends with exactly one question. This is non-negotiable.
+
+THE QUESTION MUST:
+- Be one sentence only
+- Ask about the user's lived experience — what they feel, notice, or are going through
+- Connect directly to something you just said in the same response
+- Be soft enough that answering feels easy and natural
+- Make the user feel understood, not interviewed
+
+THE QUESTION MUST NEVER:
+- Ask about planets, dashas, or astrological events
+- Be a yes/no prediction question
+- Contain two questions joined by "and"
+- Feel like a form field or menu option
+- Be generic enough to apply to anyone
+
+BAD — never use:
+"Will your income surge during Venus Antardasha?"
+"Are you experiencing mental turmoil?"
+"How do you envision making an impact and what steps are you taking?"
+"What else would you like to know?"
+
+GOOD — this is the exact tone:
+"Has this been showing up more in your body or in your mood?"
+"Is this something you have been sitting with alone?"
+"What does a good day feel like for you right now compared to before?"
+"When did you first start sensing something was shifting?"
+"Is it one area that feels stuck or does everything feel uncertain at once?"
+
+================================================================
+RULE 6 — STAY ON TOPIC
+================================================================
+Stay on the user's current topic until they clearly change it.
+"Yes" = go deeper on the same thread.
+"No" = explore a different angle on the same topic.
+One word answer = invitation to go deeper, not to move on.
+
+================================================================
+RULE 7 — EMOTION BEFORE ASTROLOGY
+================================================================
+If the user expresses pain, confusion, or exhaustion — first sentence is human warmth. Then astrology.
+
+Never open with a planet name when the user is clearly struggling.
+
+================================================================
+RULE 8 — HARD LIMITS
+================================================================
+- Never predict death or permanent disaster
+- Never give a fixed date — give windows
+- Never mention a planet not in the chart context given
+- Never repeat an insight from a previous message
+- Never use JSON, bullets, headers, bold, or asterisks
+- Always speak directly to "you" — never third person
+- If context is missing, say so honestly`;
 
 // --- Parse Suggestions from Plain Text Response ---
 function parseSuggestionsFromText(text: string): string[] {
@@ -324,70 +510,46 @@ function cleanResponseText(text: string): string {
 // DYNAMIC SUGGESTIONS (Silent Second Call)
 // ============================================================
 
-export async function generateDynamicSuggestions(lastUserMsg: string, lastAiMsg: string): Promise<string[]> {
-    // Extract key entities from the AI answer for hyper-relevant follow-ups
-    const answerSnippet = lastAiMsg.slice(0, 400);
-    const prompt = `You generate follow-up questions for a Vedic astrology chat. Read this exchange carefully.
+export async function generateDynamicSuggestions(fullConversationText: string): Promise<string[]> {
+    const prompt = `You are a suggestion generator for a Vedic astrology chat app. Look at the full conversation history below:
 
-USER ASKED: "${lastUserMsg}"
-ASTROLOGER ANSWERED: "${answerSnippet}"
+${fullConversationText}
 
-Generate exactly 3 follow-up questions. STRICT RULES:
-1. Each question MUST reference a specific entity from the answer (a planet name like Saturn/Venus, a house number like 7th/10th, a dasha name, a yoga, or a specific prediction the astrologer made).
-2. Each question must go DEEPER into the same topic — not sideways to a different topic.
-3. Maximum 8 words per question. Short and punchy.
-4. Questions must progressively deepen: first about the current situation, second about timing, third about what to do.
-5. NEVER use generic questions like "Tell me more" or "What else should I know".
-
-Return ONLY a JSON array of exactly 3 strings. Nothing else.`;
+Generate exactly 2 short follow-up questions that relate to what the user has been asking about throughout the conversation.
+IMPORTANT RULES:
+- Do not repeat the questions the astrologer already asked at the end of their response.
+- The chat questions should feel like a natural next step from everything discussed so far, not just the last message.
+- The questions must refer to specific astrological details or situations mentioned.
+- Do not generate generic astrology questions.
+- Each question must be maximum 8 words long.
+Return only a JSON array with exactly 2 strings and nothing else. Example format: ["When does my Mercury dasha end?", "How does Jupiter affect my 11th house?"]`;
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, true, 200, 0.7));
-        if (responseText) {
-            const parsed = JSON.parse(responseText);
-            if (Array.isArray(parsed) && parsed.length >= 3) {
-                return parsed.slice(0, 3);
-            }
-            if (Array.isArray(parsed) && parsed.length >= 2) {
-                return parsed.slice(0, parsed.length);
-            }
+        const parsed = await callWithRetry(() => fetchGroqJSON(prompt, 150));
+        if (parsed) {
+            if (Array.isArray(parsed) && parsed.length >= 2) return [parsed[0], parsed[1]];
+            if (parsed.suggestions && Array.isArray(parsed.suggestions)) return [parsed.suggestions[0], parsed.suggestions[1]];
         }
     } catch (e) {
-        console.warn("Dynamic suggestion generation failed, applying fallback.", e);
+        console.warn("Dynamic suggestion generation failed, applying fallback.");
     }
 
-    // Smart fallback: extract planet names and house numbers from the AI response
-    const lowerResp = lastAiMsg.toLowerCase();
-    const planets = ['jupiter', 'saturn', 'venus', 'mars', 'mercury', 'sun', 'moon', 'rahu', 'ketu'];
-    const foundPlanet = planets.find(p => lowerResp.includes(p));
-    const houseMatch = lowerResp.match(/(\d+)(?:st|nd|rd|th)\s*house/);
-    const foundHouse = houseMatch ? houseMatch[1] : null;
-    const pName = foundPlanet ? foundPlanet.charAt(0).toUpperCase() + foundPlanet.slice(1) : null;
-
-    if (pName && foundHouse) {
-        return [
-            `How strong is ${pName} in my chart?`,
-            `When does my ${pName} period activate?`,
-            `Any remedy to strengthen my ${foundHouse}th house?`
-        ];
+    // Fallback logic based on keywords in conversation
+    const lowerResp = fullConversationText.toLowerCase();
+    if (lowerResp.includes('dasha') || lowerResp.includes('period') || lowerResp.includes('antardasha')) {
+        return ["When does this dasha end?", "What comes after this dasha?"];
     }
-    if (pName) {
-        return [
-            `What is ${pName} doing in my chart?`,
-            `When is ${pName} dasha coming?`,
-            `How can I strengthen ${pName}?`
-        ];
+    if (lowerResp.includes('marriage') || lowerResp.includes('spouse') || lowerResp.includes('wedding')) {
+        return ["What is my marriage timing?", "What does my 7th house say?"];
     }
-    if (lowerResp.includes('marriage') || lowerResp.includes('spouse')) {
-        return ["What will my spouse be like?", "Love or arranged marriage?", "Best year for marriage?"];
+    if (lowerResp.includes('career') || lowerResp.includes('job') || lowerResp.includes('business') || lowerResp.includes('promotion')) {
+        return ["When is my best career period?", "Which planet helps my career most?"];
     }
-    if (lowerResp.includes('career') || lowerResp.includes('job')) {
-        return ["Should I start a business?", "When will I get promoted?", "Which field suits me best?"];
+    if (lowerResp.includes('money') || lowerResp.includes('wealth') || lowerResp.includes('income') || lowerResp.includes('finance') || lowerResp.includes('investment')) {
+        return ["When will my income increase?", "Which investment suits my chart?"];
     }
-    if (lowerResp.includes('money') || lowerResp.includes('wealth')) {
-        return ["When will income increase?", "Any Dhana Yoga in my chart?", "Best time for investments?"];
-    }
-    return ["What should I focus on now?", "Which planet is strongest for me?", "Any important dasha change soon?"];
+    
+    return ["What should I focus on this month?", "Which area needs my attention now?"];
 }
 
 // ============================================================
@@ -405,30 +567,23 @@ export async function chatWithAstrologer(
     const cleanMessage = message.trim().slice(0, 200);
 
     // 2. Detect intent
-    const intent = AIContextBuilder.detectIntent(cleanMessage);
+    const intent = detectIntent(cleanMessage);
 
-    // 3. Perform Deep Vedic Calculations for context
-    const shadbala = calculateShadbala(analysis, profile);
-    const yogas = calculateYogas(analysis, shadbala);
-    const ashtakvarga = calculateAshtakvarga(analysis.planetaryDetails, analysis.ascendant);
-    const now = new Date();
-    const transits = calculateTransits(now, analysis.ascendant);
+    // 3. Build COMPACT context (only relevant data, ~100-200 tokens)
+    const compactContext = buildCompactContext(intent, analysis, profile);
 
-    // 4. Build COMPACT context (only relevant data)
-    const compactContext = buildCompactContext(intent, analysis, profile, shadbala, yogas, ashtakvarga, transits);
-
-    // 5. Build user prompt
-    const userPrompt = `CONTEXT BLOCK:\n${compactContext}\n\nUSER_QUESTION: ${cleanMessage}`;
+    // 4. Build user prompt (minimal, ~150-300 tokens total)
+    const userPrompt = `Chart: ${compactContext}\n\nQ: ${cleanMessage}`;
 
     // 5. Build minimal history (last 1 exchange only to save tokens)
     const minimalHistory = history.slice(-2).map(h => ({
-        role: h.role === 'model' ? 'assistant' : 'user',
-        content: typeof h.parts?.[0]?.text === 'string' ? h.parts[0].text.slice(0, 200) : ''
+        role: h.role,
+        parts: [{ text: typeof h.parts?.[0]?.text === 'string' ? h.parts[0].text.slice(0, 200) : '' }]
     }));
 
     try {
-        const responseTextRaw = await callWithRetry<string>(() => chatContent(CHAT_SYSTEM_PROMPT, minimalHistory, userPrompt, 1500, 0.75));
-        let responseText = responseTextRaw || "The stars are momentarily obscured. Please ask again.";
+        let responseText = await callWithRetry(() => fetchGroqText(userPrompt, 600, CHAT_SYSTEM_PROMPT, minimalHistory));
+        if (!responseText) responseText = "The stars are momentarily obscured. Please ask again.";
 
         // 6. Clean the response (strip any accidental JSON/markdown)
         responseText = cleanResponseText(responseText);
@@ -456,42 +611,32 @@ export async function chatWithAstrologer(
 // SEPARATE CHANNEL FUNCTIONS (On-Demand, Button-Triggered)
 // ============================================================
 
-// ADVICE & REMEDIES CHANNEL — Generates Do's, Don'ts, and Vedic Remedies specific to the chart and topic.
+// ADVICE CHANNEL — Generates highly specific, real astrological advice based on the user's chart.
 export async function getAdviceChannel(
     topic: string,
     analysis: BirthChartAnalysis,
-    profile: UserProfile,
-    lastAiResponse?: string
+    profile: UserProfile
 ): Promise<string> {
     const context = buildCompactContext(topic, analysis, profile);
     const intent = topic || 'general';
-    const answerContext = lastAiResponse ? `\nPrevious Answer Context: ${lastAiResponse.slice(0, 300)}` : '';
 
-    const prompt = `You are a Vedic Astrologer giving specific advice and remedies.
-User: ${profile.name}, Gender: ${profile.gender}
+    const prompt = `You are a Vedic Astrologer providing concise, highly actionable advice.
+User: ${profile.name}
 Topic: ${intent}
-Chart Data: ${context}${answerContext}
+Chart Data: ${context}
 
-Provide advice in this EXACT format (plain text, no markdown):
-
-✅ DO: [One specific, practical action the user should take based on their chart — mention the planet or house involved. Max 2 sentences.]
-
-❌ DON'T: [One specific thing to avoid during this planetary period — mention the planet or dasha. Max 2 sentences.]
-
-🙏 REMEDY: [One Vedic remedy specific to the weak or afflicted planet in their chart — specify the exact mantra, day, gemstone, charity, or color. Be precise. Max 2 sentences.]
-
-RULES:
-- Every point must reference an actual planet, house, or dasha from the chart data.
-- Never give generic advice like "stay positive" or "be patient".
-- The remedy MUST name the specific planet it's for.
-- Keep total response under 150 words.`;
+REQUIREMENTS:
+1. Provide EXACTLY ONE SHORT PARAGRAPH of advice (max 400 characters).
+2. Give one practical, earthly action they can take today AND one astrological remedy (e.g., chanting, charity, or colors to wear).
+3. Plain text only. NO markdown, NO bullet points, NO lists. Flow naturally.
+4. Do NOT say "Here is your advice" or use filler words. Go straight into the guidance.`;
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, false, 300, 0.6));
-        return responseText?.trim() || "✅ DO: Focus on strengthening your Lagna lord through morning discipline.\n\n❌ DON'T: Avoid major commitments during the current malefic transit.\n\n🙏 REMEDY: Chant the Maha Mrityunjaya Mantra 11 times daily to strengthen your overall vitality.";
+        const responseText = await callWithRetry(() => fetchGroqText(prompt, 200));
+        return cleanResponseText(responseText || "Focus on grounding yourself today. A brief meditation will align your energies.");
     } catch (e) {
         console.error('Advice API failed:', e);
-        return "✅ DO: Focus on grounding practices today — morning walks and structured routines support your Lagna lord.\n\n❌ DON'T: Avoid impulsive financial decisions during this transit.\n\n🙏 REMEDY: Light a mustard oil lamp on Saturdays to appease Saturn's influence on your chart.";
+        return "Focus on grounding yourself today. Small, consistent steps will help clear the karmic blockages currently present.";
     }
 }
 
@@ -511,7 +656,7 @@ Dasha: ${abbr(maha)}-${abbr(antar)}, Ascendant: ${signAbbr(analysis.ascendant)}.
 Write 3-4 sentences about what the current dasha period means for this topic and what to expect in the coming months. Be specific and warm. At least 300 characters. No JSON. No markdown.`;
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, false, 400, 0.8));
+        const responseText = await callWithRetry(() => fetchGroqText(prompt, 400));
         return cleanResponseText(responseText || 'Current period brings gradual progress. Stay patient and focused.');
     } catch {
         return 'Your current dasha period supports steady growth. Major shifts are expected in the coming months.';
@@ -524,7 +669,7 @@ export async function getDeepInsight(
     analysis: BirthChartAnalysis,
     profile: UserProfile
 ): Promise<string> {
-    const intent = AIContextBuilder.detectIntent(topic);
+    const intent = detectIntent(topic);
     const context = buildCompactContext(intent, analysis, profile);
 
     const prompt = `You are a wise Vedic astrologer. Give a deep, meaningful insight for "${topic}".
@@ -532,7 +677,7 @@ Chart: ${context}.
 Write 3-4 profound sentences connecting their planetary positions to patterns in their life. Be specific about which planets and houses create these patterns. At least 300 characters. No JSON. No markdown.`;
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, false, 400, 0.8));
+        const responseText = await callWithRetry(() => fetchGroqText(prompt, 400));
         return cleanResponseText(responseText || 'Your chart reveals a deep pattern of growth through experience.');
     } catch {
         return 'Your planetary alignment suggests a journey of inner transformation leading to outer success.';
@@ -554,8 +699,8 @@ export async function checkCompatibility(p1: UserProfile, p2Name: string, p2Date
     `;
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, true));
-        return JSON.parse(responseText || '{ "score": 18, "summary": "Average match." }');
+        const parsed = await callWithRetry(() => fetchGroqJSON(prompt, 200));
+        return parsed || { score: 18, summary: "Average match." };
     } catch (e) {
         return { score: 18, summary: "Unable to calculate detailed compatibility at this time." };
     }
@@ -588,7 +733,7 @@ export async function generateDetailedKundliReport(profile: UserProfile, analysi
     `;
 
     try {
-        const responseText = await callWithRetry<string>(() => generateContent(prompt, false));
+        const responseText = await callWithRetry(() => fetchGroqText(prompt, 2000));
         return responseText || "Report generation failed.";
     } catch (e) {
         console.error("Report generation failed", e);

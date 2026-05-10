@@ -4,8 +4,6 @@ import { Icons } from '../components/Icons';
 import { InfoRow } from '../components/UI';
 import { getGeoLocation } from '../services/geminiService';
 import { calculateCurrentPlanets, ZODIAC_SIGNS } from '../services/astrologyEngine';
-import { Capacitor } from '@capacitor/core';
-import { Geolocation } from '@capacitor/geolocation';
 import { calculatePanchang, PanchangDetailed } from '../services/panchangSystem';
 import { calculateLucky, LuckyResult } from '../services/luckyEngine';
 import { UserProfile, BirthChartAnalysis } from '../types';
@@ -33,34 +31,21 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, profile, onOpenDashboar
 
 
     useEffect(() => {
-        const fetchLocation = async () => {
-            if (Capacitor.isNativePlatform()) {
-                try {
-                    const pos = await Geolocation.getCurrentPosition();
-                    setCurrentLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-                } catch (e) {
-                    console.error("Native loc failed", e);
-                    // Fallback to location-based geocoding if GPS fails/denied
-                    const coords = await getGeoLocation(profile.location, new Date().toISOString().split('T')[0]);
-                    setCurrentLocation({ lat: coords.lat, lon: coords.lon });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => setCurrentLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+                async () => {
+                    try {
+                        const coords = await getGeoLocation(profile.location, new Date().toISOString().split('T')[0]);
+                        setCurrentLocation({ lat: coords.lat, lon: coords.lon });
+                    } catch (e) { console.error("Loc fallback failed", e); }
                 }
-            } else if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => setCurrentLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-                    async () => {
-                        try {
-                            const coords = await getGeoLocation(profile.location, new Date().toISOString().split('T')[0]);
-                            setCurrentLocation({ lat: coords.lat, lon: coords.lon });
-                        } catch (e) { console.error("Loc fallback failed", e); }
-                    }
-                );
-            } else {
-                getGeoLocation(profile.location, new Date().toISOString().split('T')[0])
-                    .then(coords => setCurrentLocation({ lat: coords.lat, lon: coords.lon }))
-                    .catch(e => console.error("Loc fallback failed", e));
-            }
-        };
-        fetchLocation();
+            );
+        } else {
+            getGeoLocation(profile.location, new Date().toISOString().split('T')[0])
+                .then(coords => setCurrentLocation({ lat: coords.lat, lon: coords.lon }))
+                .catch(e => console.error("Loc fallback failed", e));
+        }
     }, [profile.location]);
 
     useEffect(() => {

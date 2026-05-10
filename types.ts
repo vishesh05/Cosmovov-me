@@ -31,8 +31,11 @@ export enum AppView {
 
   // Admin Views
   AdminDashboard = 'ADMIN_DASHBOARD',
+  AdminRetention = 'ADMIN_RETENTION',
+  AdminAIChat = 'ADMIN_AI_CHAT',
+  AdminFeatures = 'ADMIN_FEATURES',
+  AdminContent = 'ADMIN_CONTENT',
   AdminUsers = 'ADMIN_USERS',
-  AdminAstrologers = 'ADMIN_ASTROLOGERS',
   AdminFinance = 'ADMIN_FINANCE',
   AdminSupport = 'ADMIN_SUPPORT',
 }
@@ -246,10 +249,6 @@ export interface LuckyElements {
   number: number;
 }
 
-export interface CoreGrowthItem {
-  title: string;
-  description: string;
-}
 
 export interface DailyRitual {
   title: string;
@@ -268,10 +267,7 @@ export interface TodayData {
     powerHour: PowerHour;
     luckyElements: LuckyElements;
   };
-  coreAndGrowthPower: {
-    coreFocus: CoreGrowthItem;
-    growthArea: CoreGrowthItem;
-  };
+
   dailyRitual: DailyRitual;
   computedDate: string; // YYYY-MM-DD for cache key
   fullLuckyData?: {

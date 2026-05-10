@@ -22,13 +22,13 @@ export const DashboardMenuItem: React.FC<{ icon: React.ReactNode; label: string;
   <button 
     onClick={onClick}
     disabled={disabled || loading}
-    className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-95 mb-2 border ${danger ? 'bg-red-50/30 border-red-50 text-red-500' : 'bg-white border-stone-50 text-charcoal-800 hover:border-gold-200'} disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100`}
+    className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-95 mb-2 border ${danger ? 'bg-red-50/30 dark:bg-red-500/10 border-red-50 dark:border-red-500/20 text-red-500' : 'bg-white dark:bg-[#1c1b19] border-stone-50 dark:border-[#33312e] text-charcoal-800 dark:text-ivory-50 hover:border-gold-200 dark:hover:border-gold-500/30'} disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100`}
   >
-    <div className={`p-2 rounded-xl ${danger ? 'bg-red-50' : 'bg-stone-50'}`}>
+    <div className={`p-2 rounded-xl ${danger ? 'bg-red-50 dark:bg-red-500/10' : 'bg-stone-50 dark:bg-[#2a2826]'}`}>
       {icon}
     </div>
     <span className="text-sm font-medium flex-1 text-left">{label}</span>
-    <div className="text-stone-300">
+    <div className="text-stone-300 dark:text-stone-600">
       {loading ? <div className="w-4 h-4 border-2 border-stone-200 border-t-red-400 rounded-full animate-spin" /> : <Icons.ChevronRight />}
     </div>
   </button>
@@ -37,7 +37,7 @@ export const DashboardMenuItem: React.FC<{ icon: React.ReactNode; label: string;
 export const UserDashboardDrawer: React.FC<{ isOpen: boolean; onClose: () => void; children: React.ReactNode }> = ({ isOpen, onClose, children }) => {
   return (
     <div 
-      className={`absolute inset-0 bg-ivory-50 z-[150] transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      className={`absolute inset-0 bg-ivory-50 dark:bg-[#141413] z-[150] transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
     >
       <div className="bg-noise absolute inset-0 opacity-40 pointer-events-none"></div>
       <div className="relative h-full flex flex-col">

@@ -33,44 +33,44 @@ const PlanetaryDetails: React.FC<PlanetaryDetailsProps> = ({ analysis, profile, 
     };
 
     return (
-        <div className="min-h-screen bg-ivory-50 pb-32">
+        <div className="min-h-screen bg-ivory-50 dark:bg-[#141413] pb-32">
             {/* Header */}
-            <div className="bg-white border-b border-stone-100 sticky top-0 z-10">
+            <div className="bg-white dark:bg-[#1c1b19] border-b border-stone-100 dark:border-[#33312e] sticky top-0 z-10 w-full transition-colors duration-300">
                 <div className="p-6">
-                    <button onClick={onBack} className="flex items-center gap-2 text-charcoal-600 mb-4 hover:text-gold-600 transition-colors">
+                    <button onClick={onBack} className="flex items-center gap-2 text-charcoal-600 dark:text-stone-400 mb-4 hover:text-gold-600 dark:hover:text-gold-400 transition-colors">
                         <Icons.ChevronLeft className="w-4 h-4" />
                         <span className="text-sm font-medium">Back to Tools</span>
                     </button>
-                    <h1 className="text-2xl font-serif text-charcoal-900 mb-1">Planetary Details</h1>
-                    <p className="text-xs text-charcoal-500">Comprehensive planetary position analysis</p>
+                    <h1 className="text-2xl font-serif text-charcoal-900 dark:text-ivory-50 mb-1">Planetary Details</h1>
+                    <p className="text-xs text-charcoal-500 dark:text-stone-400">Comprehensive planetary position analysis</p>
                 </div>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-4">
                 {analysis.planetaryDetails.map((planet, idx) => (
-                    <div key={idx} className="bg-white rounded-3xl border border-stone-100 shadow-sm overflow-hidden">
+                    <div key={idx} className="bg-white dark:bg-[#1c1b19] rounded-3xl border border-stone-100 dark:border-[#33312e] shadow-sm overflow-hidden">
                         {/* Planet Header */}
-                        <div className="bg-gradient-to-r from-gold-50 to-ivory-50 p-5 border-b border-stone-100">
+                        <div className="bg-gradient-to-r from-gold-50 dark:from-gold-900/20 to-ivory-50 dark:to-[#1c1b19] p-5 border-b border-stone-100 dark:border-[#33312e]">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-charcoal-900 text-gold-400 flex items-center justify-center font-serif font-bold text-lg">
+                                    <div className="w-12 h-12 rounded-full bg-charcoal-900 dark:bg-[#2a2826] text-gold-400 flex items-center justify-center font-serif font-bold text-lg">
                                         {planet.name.substring(0, 2)}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h3 className="font-bold text-lg text-charcoal-900">{planet.name}</h3>
+                                            <h3 className="font-bold text-lg text-charcoal-900 dark:text-ivory-50">{planet.name}</h3>
                                         </div>
                                         <div className="flex items-center gap-2 mt-1 -ml-0.5">
-                                            {planet.isRetro && <span className="text-[9px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">RETROGRADE</span>}
-                                            {planet.isCombust && <span className="text-[9px] bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-bold">COMBUST</span>}
-                                            {planet.dignity === 'exalted' && <span className="text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">EXALTED</span>}
-                                            {planet.dignity === 'debilitated' && <span className="text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">DEBILITATED</span>}
+                                            {planet.isRetro && <span className="text-[9px] bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-bold">RETROGRADE</span>}
+                                            {planet.isCombust && <span className="text-[9px] bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold">COMBUST</span>}
+                                            {planet.dignity === 'exalted' && <span className="text-[9px] bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-bold">EXALTED</span>}
+                                            {planet.dignity === 'debilitated' && <span className="text-[9px] bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 px-2 py-0.5 rounded-full font-bold">DEBILITATED</span>}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-2xl font-serif text-charcoal-900">{planet.rashi}</div>
+                                    <div className="text-2xl font-serif text-charcoal-900 dark:text-ivory-50">{planet.rashi}</div>
                                     <div className="text-xs text-charcoal-500 font-mono mt-1">{planet.formatted}</div>
                                 </div>
                             </div>
@@ -79,51 +79,51 @@ const PlanetaryDetails: React.FC<PlanetaryDetailsProps> = ({ analysis, profile, 
                         {/* Detailed Information Grid */}
                         <div className="p-5 grid grid-cols-2 gap-4">
                             {/* Position */}
-                            <div className="bg-ivory-50 rounded-xl p-3 border border-stone-100">
+                            <div className="bg-ivory-50 dark:bg-[#2a2826] rounded-xl p-3 border border-stone-100 dark:border-[#33312e]">
                                 <div className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-1">Position</div>
-                                <div className="text-sm font-bold text-charcoal-900">{planet.degreeInRashi.toFixed(2)}°</div>
-                                <div className="text-xs text-charcoal-500 mt-0.5">in {planet.rashi}</div>
+                                <div className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">{planet.degreeInRashi.toFixed(2)}°</div>
+                                <div className="text-xs text-charcoal-500 dark:text-stone-400 mt-0.5">in {planet.rashi}</div>
                             </div>
 
                             {/* House */}
-                            <div className="bg-ivory-50 rounded-xl p-3 border border-stone-100">
+                            <div className="bg-ivory-50 dark:bg-[#2a2826] rounded-xl p-3 border border-stone-100 dark:border-[#33312e]">
                                 <div className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-1">House</div>
-                                <div className="text-sm font-bold text-charcoal-900">House {getPlanetHouse(planet.name)}</div>
-                                <div className="text-xs text-charcoal-500 mt-0.5">{analysis.houses.find(h => h.houseNumber === getPlanetHouse(planet.name))?.sign}</div>
+                                <div className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">House {getPlanetHouse(planet.name)}</div>
+                                <div className="text-xs text-charcoal-500 dark:text-stone-400 mt-0.5">{analysis.houses.find(h => h.houseNumber === getPlanetHouse(planet.name))?.sign}</div>
                             </div>
 
                             {/* Nakshatra */}
-                            <div className="bg-ivory-50 rounded-xl p-3 border border-stone-100">
+                            <div className="bg-ivory-50 dark:bg-[#2a2826] rounded-xl p-3 border border-stone-100 dark:border-[#33312e]">
                                 <div className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-1">{getTerm('nakshatra', 'vedic')}</div>
-                                <div className="text-sm font-bold text-charcoal-900">{planet.nakshatra}</div>
-                                <div className="text-xs text-charcoal-500 mt-0.5">Pada {planet.pada}</div>
+                                <div className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">{planet.nakshatra}</div>
+                                <div className="text-xs text-charcoal-500 dark:text-stone-400 mt-0.5">Pada {planet.pada}</div>
                             </div>
 
                             {/* Nakshatra Lord */}
-                            <div className="bg-ivory-50 rounded-xl p-3 border border-stone-100">
+                            <div className="bg-ivory-50 dark:bg-[#2a2826] rounded-xl p-3 border border-stone-100 dark:border-[#33312e]">
                                 <div className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-1">{getTerm('nakshatra', 'vedic')} Lord</div>
-                                <div className="text-sm font-bold text-charcoal-900">{planet.nakshatraLord}</div>
-                                <div className="text-xs text-charcoal-500 mt-0.5">Sub: {planet.nakshatraSubLord}</div>
+                                <div className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">{planet.nakshatraLord}</div>
+                                <div className="text-xs text-charcoal-500 dark:text-stone-400 mt-0.5">Sub: {planet.nakshatraSubLord}</div>
                             </div>
 
                             {/* Sign Lord */}
-                            <div className="bg-ivory-50 rounded-xl p-3 border border-stone-100">
+                            <div className="bg-ivory-50 dark:bg-[#2a2826] rounded-xl p-3 border border-stone-100 dark:border-[#33312e]">
                                 <div className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-1">Sign Lord</div>
-                                <div className="text-sm font-bold text-charcoal-900">{planet.rashiLord}</div>
-                                <div className="text-xs text-charcoal-500 mt-0.5">Ruler of {planet.rashi}</div>
+                                <div className="text-sm font-bold text-charcoal-900 dark:text-ivory-50">{planet.rashiLord}</div>
+                                <div className="text-xs text-charcoal-500 dark:text-stone-400 mt-0.5">Ruler of {planet.rashi}</div>
                             </div>
 
                             {/* Friendship Status */}
-                            <div className="bg-ivory-50 rounded-xl p-3 border border-stone-100">
+                            <div className="bg-ivory-50 dark:bg-[#2a2826] rounded-xl p-3 border border-stone-100 dark:border-[#33312e]">
                                 <div className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mb-1">Status</div>
-                                <div className={`text-sm font-bold ${getFriendshipStatus(planet.name, planet.rashiLord) === 'Friend' ? 'text-green-600' :
-                                        getFriendshipStatus(planet.name, planet.rashiLord) === 'Enemy' ? 'text-red-600' :
-                                            getFriendshipStatus(planet.name, planet.rashiLord) === 'Own Sign' ? 'text-blue-600' :
-                                                'text-charcoal-600'
+                                <div className={`text-sm font-bold ${getFriendshipStatus(planet.name, planet.rashiLord) === 'Friend' ? 'text-green-600 dark:text-green-400' :
+                                        getFriendshipStatus(planet.name, planet.rashiLord) === 'Enemy' ? 'text-red-600 dark:text-red-400' :
+                                            getFriendshipStatus(planet.name, planet.rashiLord) === 'Own Sign' ? 'text-blue-600 dark:text-blue-400' :
+                                                'text-charcoal-600 dark:text-stone-300'
                                     }`}>
                                     {getFriendshipStatus(planet.name, planet.rashiLord)}
                                 </div>
-                                <div className="text-xs text-charcoal-500 mt-0.5">
+                                <div className="text-xs text-charcoal-500 dark:text-stone-400 mt-0.5">
                                     {getFriendshipStatus(planet.name, planet.rashiLord) === 'Own Sign' ? 'Swakshetra' :
                                         getFriendshipStatus(planet.name, planet.rashiLord) === 'Friend' ? 'Mitra Kshetra' :
                                             getFriendshipStatus(planet.name, planet.rashiLord) === 'Enemy' ? 'Shatru Kshetra' : 'Sama Kshetra'}

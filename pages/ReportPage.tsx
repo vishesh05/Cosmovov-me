@@ -65,19 +65,19 @@ const ReportPage: React.FC<ReportPageProps> = ({ reportType, profile, analysis, 
             return (
               <div className="space-y-6">
                 <div className="flex justify-between items-center text-center px-2">
-                   <div><div className="w-12 h-12 mx-auto bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mb-3 shadow-sm border border-amber-100"><Icons.Sun className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 uppercase tracking-wide">{sun} Sun</p></div>
-                   <div><div className="w-12 h-12 mx-auto bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-3 shadow-sm border border-indigo-100"><Icons.Moon className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 uppercase tracking-wide">{moon} Moon</p></div>
-                   <div><div className="w-12 h-12 mx-auto bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-3 shadow-sm border border-rose-100"><Icons.Star className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 uppercase tracking-wide">{ascendant} Rising</p></div>
-                   <div><div className="w-12 h-12 mx-auto bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 shadow-sm border border-emerald-100"><Icons.User className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 uppercase tracking-wide">{atmakaraka} Soul</p></div>
+                   <div><div className="w-12 h-12 mx-auto bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mb-3 shadow-sm border border-amber-100 dark:border-amber-900/30"><Icons.Sun className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 dark:text-stone-300 uppercase tracking-wide">{sun} Sun</p></div>
+                   <div><div className="w-12 h-12 mx-auto bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 dark:text-indigo-400 rounded-full flex items-center justify-center mb-3 shadow-sm border border-indigo-100 dark:border-indigo-900/30"><Icons.Moon className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 dark:text-stone-300 uppercase tracking-wide">{moon} Moon</p></div>
+                   <div><div className="w-12 h-12 mx-auto bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 rounded-full flex items-center justify-center mb-3 shadow-sm border border-rose-100 dark:border-rose-900/30"><Icons.Star className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 dark:text-stone-300 uppercase tracking-wide">{ascendant} Rising</p></div>
+                   <div><div className="w-12 h-12 mx-auto bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-3 shadow-sm border border-emerald-100 dark:border-emerald-900/30"><Icons.User className="w-5 h-5" /></div><p className="text-[11px] font-bold text-charcoal-700 dark:text-stone-300 uppercase tracking-wide">{atmakaraka} Soul</p></div>
                 </div>
                 {dignities.length > 0 && (
-                  <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 mt-4 text-left">
-                     <h4 className="text-xs font-bold text-amber-800 uppercase tracking-widest mb-3 flex items-center gap-2"><Icons.Sparkles className="w-3 h-3"/> Key Dignities</h4>
+                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-100 dark:border-amber-900/30 mt-4 text-left">
+                     <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-3 flex items-center gap-2"><Icons.Sparkles className="w-3 h-3"/> Key Dignities</h4>
                      <div className="space-y-2">
                         {dignities.map((d, i) => (
-                           <div key={i} className="flex justify-between items-center text-sm border-b border-amber-200/50 pb-1 last:border-0 last:pb-0">
-                              <span className="font-bold text-charcoal-800">{d.name}</span>
-                              <span className="text-amber-700 text-xs font-medium bg-amber-200/50 px-2 py-0.5 rounded">
+                           <div key={i} className="flex justify-between items-center text-sm border-b border-amber-200/50 dark:border-amber-900/50 pb-1 last:border-0 last:pb-0">
+                              <span className="font-bold text-charcoal-800 dark:text-ivory-50">{d.name}</span>
+                              <span className="text-amber-700 dark:text-amber-300 text-xs font-medium bg-amber-200/50 dark:bg-amber-900/40 px-2 py-0.5 rounded">
                                  {d.dignity === 'exalted' ? 'Exalted (High Power)' : d.dignity === 'debilitated' ? 'Debilitated (Challenged)' : 'In Own Sign (Strong)'}
                               </span>
                            </div>
@@ -137,11 +137,11 @@ const ReportPage: React.FC<ReportPageProps> = ({ reportType, profile, analysis, 
         renderToons: (data: any[]) => (
           <div className="space-y-4">
             {data.map((item, idx) => (
-              <div key={idx} className="bg-emerald-50 p-4 rounded-xl flex gap-4 items-start border border-emerald-100 shadow-sm">
-                 <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200"><Icons.Star className="w-4 h-4" /></div>
+              <div key={idx} className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl flex gap-4 items-start border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+                 <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-200 dark:border-emerald-900/30"><Icons.Star className="w-4 h-4" /></div>
                  <div>
-                   <h4 className="font-bold text-charcoal-800 text-sm mb-1">{item.strengthTitle} ({item.planetName})</h4>
-                   <p className="text-xs text-stone-600 leading-relaxed">{item.description}</p>
+                   <h4 className="font-bold text-charcoal-800 dark:text-ivory-50 text-sm mb-1">{item.strengthTitle} ({item.planetName})</h4>
+                   <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">{item.description}</p>
                  </div>
               </div>
             ))}
@@ -158,11 +158,11 @@ const ReportPage: React.FC<ReportPageProps> = ({ reportType, profile, analysis, 
         renderToons: (data: any[]) => (
           <div className="space-y-4">
             {data.map((item, idx) => (
-              <div key={idx} className="bg-rose-50 p-4 rounded-xl flex gap-4 items-start border border-rose-100 shadow-sm">
-                 <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center flex-shrink-0 mt-0.5 border border-rose-200"><Icons.Activity className="w-4 h-4" /></div>
+              <div key={idx} className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-xl flex gap-4 items-start border border-rose-100 dark:border-rose-900/30 shadow-sm">
+                 <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-500 dark:text-rose-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-rose-200 dark:border-rose-900/30"><Icons.Activity className="w-4 h-4" /></div>
                  <div>
-                   <h4 className="font-bold text-charcoal-800 text-sm mb-1">{item.challengeTitle} ({item.planetName})</h4>
-                   <p className="text-xs text-stone-600 leading-relaxed">{item.description}</p>
+                   <h4 className="font-bold text-charcoal-800 dark:text-ivory-50 text-sm mb-1">{item.challengeTitle} ({item.planetName})</h4>
+                   <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">{item.description}</p>
                  </div>
               </div>
             ))}
@@ -173,14 +173,14 @@ const ReportPage: React.FC<ReportPageProps> = ({ reportType, profile, analysis, 
         id: 'dasha',
         title: 'Current Dasha Era',
         visualComponent: (
-            <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 shadow-sm relative overflow-hidden">
-                <div className="absolute -right-12 -top-12 w-48 h-48 text-indigo-400 opacity-[0.06] rotate-45 pointer-events-none">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm relative overflow-hidden">
+                <div className="absolute -right-12 -top-12 w-48 h-48 text-indigo-400 dark:text-indigo-500 opacity-[0.06] dark:opacity-10 rotate-45 pointer-events-none">
                     <Icons.MandalaBackground />
                 </div>
-                <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold mb-2">Current Major Period</p>
+                <p className="text-[10px] text-stone-400 dark:text-stone-400 uppercase tracking-widest font-bold mb-2">Current Major Period</p>
                 <div className="flex items-end gap-3 relative z-10">
-                   <h3 className="text-3xl font-serif text-indigo-700 tracking-wide">{analysis?.dashas?.[0]?.planet || 'Jupiter'}</h3>
-                   <span className="text-stone-500 text-sm mb-1.5 font-medium">Mahadasha</span>
+                   <h3 className="text-3xl font-serif text-indigo-700 dark:text-indigo-300 tracking-wide">{analysis?.dashas?.[0]?.planet || 'Jupiter'}</h3>
+                   <span className="text-stone-500 dark:text-stone-400 text-sm mb-1.5 font-medium">Mahadasha</span>
                 </div>
             </div>
         ),
@@ -377,7 +377,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ reportType, profile, analysis, 
         </div>
 
         {/* Hero Banner Area */}
-        <div className="relative pt-10 pb-10 px-6 bg-gradient-to-b from-white to-stone-50 border-b border-stone-100 overflow-hidden">
+        <div className="relative pt-10 pb-10 px-6 bg-gradient-to-b from-white dark:from-[#1c1b19] to-stone-50 dark:to-[#141413] border-b border-stone-100 overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] text-amber-500 opacity-[0.06] transform translate-x-1/4 -translate-y-1/4 pointer-events-none">
                 <Icons.MandalaBackground />
             </div>
@@ -385,15 +385,15 @@ const ReportPage: React.FC<ReportPageProps> = ({ reportType, profile, analysis, 
                 <Icons.MandalaBackground />
             </div>
             <div className="flex flex-col items-center text-center relative z-10 max-w-2xl mx-auto">
-               <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center mb-6 border border-amber-200 shadow-sm">
-                  <Icons.Sparkles className="w-10 h-10 text-amber-500" />
+               <div className="w-20 h-20 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-6 border border-amber-200 dark:border-amber-900/30 shadow-sm">
+                  <Icons.Sparkles className="w-10 h-10 text-amber-500 dark:text-amber-400" />
                </div>
                <h2 className="text-3xl font-serif text-charcoal-900 mb-4 tracking-wide leading-tight">Sacred Astrological<br/><span className="text-amber-600">Reading</span></h2>
                <p className="text-stone-500 text-[15px] max-w-sm mb-6 leading-[1.8] font-medium">
                  A deeply authentic and spiritual analysis drawn from ancient Vedic principles, formulated exclusively for {profile.name}.
                </p>
                {cacheTimestamp && (
-                  <div className="px-5 py-2.5 bg-emerald-50 rounded-full border border-emerald-200 text-[11px] font-bold tracking-wide text-emerald-700 shadow-sm flex items-center gap-2">
+                  <div className="px-5 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-full border border-emerald-200 dark:border-emerald-900/30 text-[11px] font-bold tracking-wide text-emerald-700 dark:text-emerald-400 shadow-sm flex items-center gap-2">
                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                      Generated today at {cacheTimestamp}
                   </div>
