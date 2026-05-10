@@ -211,7 +211,7 @@ export async function generateBirthChartAnalysis(profile: UserProfile): Promise<
 
 // --- Context Helpers ---
 
-function getCurrentDashaChain(dashas: DashaPeriod[]): string {
+export function getCurrentDashaChain(dashas: DashaPeriod[]): string {
     const now = new Date();
     const findCurrent = (periods: DashaPeriod[]): string[] => {
         for (const p of periods) {

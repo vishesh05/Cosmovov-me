@@ -149,6 +149,25 @@ export const Icons = {
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
     </svg>
   ),
+  Lightning: ({ className, strokeWidth = 1.5 }: IconProps) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} className={className}>
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+  ),
+  Flower: ({ className, strokeWidth = 1.5 }: IconProps) => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} className={className}>
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"></path>
+      <path d="M12 7.5V9"></path>
+      <path d="M7.5 12H9"></path>
+      <path d="M16.5 12H15"></path>
+      <path d="M12 16.5V15"></path>
+      <path d="M8.8 8.8l1.1 1.1"></path>
+      <path d="M15.2 15.2l-1.1-1.1"></path>
+      <path d="M8.8 15.2l1.1-1.1"></path>
+      <path d="M15.2 8.8l-1.1 1.1"></path>
+    </svg>
+  ),
   Users: ({ className, strokeWidth = 1.2 }: IconProps) => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} className={className}>
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>

@@ -193,6 +193,13 @@ const App: React.FC = () => {
     }
   }, [showGuestToast]);
 
+  // Navigate to Chat Event Listener (from HomeInsights)
+  useEffect(() => {
+    const handleNavigate = () => setView(AppView.Chat);
+    window.addEventListener('navigate_to_chat', handleNavigate);
+    return () => window.removeEventListener('navigate_to_chat', handleNavigate);
+  }, []);
+
   // Handle URL Hash Errors (Supabase Redirects)
   useEffect(() => {
     const hash = window.location.hash;

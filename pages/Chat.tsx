@@ -52,6 +52,15 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
         };
     }, []);
 
+    // Handle "Ask Jyoti" pre-loaded context
+    useEffect(() => {
+        const prePrompt = localStorage.getItem('astroveda_chat_pre_prompt');
+        if (prePrompt) {
+            setInput(prePrompt);
+            localStorage.removeItem('astroveda_chat_pre_prompt');
+        }
+    }, [currentSessionId]);
+
     const toggleListening = () => {
         if (isListening) {
             recognitionRef.current?.stop();
@@ -543,7 +552,7 @@ const ChatView: React.FC<ChatViewProps> = ({ analysis, profile, onBack }) => {
                                 <div className="grid grid-cols-3 gap-3">
                                     {[
                                         { label: 'Ascendant', value: analysis.ascendant, icon: <Icons.Sun className="w-3.5 h-3.5" /> },
-                                        { label: 'Moon Sign', value: analysis.moonSign || analysis.planetaryDetails?.find(p => p.planet === 'Moon')?.sign || '—', icon: <Icons.Moon className="w-3.5 h-3.5" /> },
+                                        { label: 'Moon Sign', value: analysis.moonSign || analysis.planetaryDetails?.find(p => p.name === 'Moon')?.rashi || '—', icon: <Icons.Moon className="w-3.5 h-3.5" /> },
                                         { label: 'Dasha Lord', value: analysis.dashas?.[0]?.planet || '—', icon: <Icons.Star className="w-3.5 h-3.5" /> },
                                     ].map((item, i) => (
                                         <div key={i} className="text-center">
